@@ -12,9 +12,14 @@ typedef struct
 class TransformationMatrix
 {
 public:
-    TransformationMatrix() : translation({0.0f, 0.0f}), rotation(0.0f), scale(1.0f) {}
+    TransformationMatrix() :
+        translation({0.0f, 0.0f}),
+        rotation(0.0f),
+        scale(1.0f),
+        velocity({0.0f, 0.0f}) {}
 
     void translate(Vec2 tl);
+    void addVelocity(Vec2 vel);
     void rotate(float angle);
     void scaleTransform(float scaleFactor);
 
@@ -23,6 +28,7 @@ public:
     Vec2 getTranslation();
     float getRotation();
     float getScale();
+    Vec2 getVelocity();
 
     float *getMatrix();
     void print();
@@ -33,6 +39,7 @@ public:
 
 private:
     Vec2 translation;
+    Vec2 velocity;
     float rotation;
     float scale;
     float transformationMatrix[16];

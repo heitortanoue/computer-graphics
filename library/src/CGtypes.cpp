@@ -52,10 +52,24 @@ float *TransformationMatrix::getMatrix()
     return transformationMatrix;
 }
 
+void TransformationMatrix::addVelocity(Vec2 vel)
+{
+    velocity.x += vel.x;
+    velocity.y += vel.y;
+}
+
+Vec2 TransformationMatrix::getVelocity()
+{
+    return velocity;
+}
+
 void TransformationMatrix::updateMatrix()
 {
     float cosAngle = cos(rotation);
     float sinAngle = sin(rotation);
+
+    translation.x += velocity.x;
+    translation.y += velocity.y;
 
     transformationMatrix[0] = scale * cosAngle;
     transformationMatrix[1] = scale * sinAngle;

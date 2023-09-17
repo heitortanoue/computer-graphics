@@ -5,7 +5,7 @@
 
 using namespace std;
 
-const float translationSpeed = .03f;
+const float velocity = .01f;
 const float rotationSpeed = .05f;
 const float scaleSpeed = .02f;
 
@@ -22,13 +22,13 @@ int main(void)
     triangle.setKeyEventCallback([&triangle](int key, int scancode, int action, int mods)
     {
         if (key == 262)
-            (*triangle.getTransformationMatrix()).translate({translationSpeed, 0}); // tecla para direita
+            (*triangle.getTransformationMatrix()).addVelocity({velocity, 0}); // tecla para direita
         if (key == 263)
-            (*triangle.getTransformationMatrix()).translate({-translationSpeed, 0}); // tecla para esquerda
+            (*triangle.getTransformationMatrix()).addVelocity({-velocity, 0}); // tecla para esquerda
         if (key == 265)
-            (*triangle.getTransformationMatrix()).translate({0, translationSpeed}); // tecla para cima
+            (*triangle.getTransformationMatrix()).translate({0, velocity}); // tecla para cima
         if (key == 264)
-            (*triangle.getTransformationMatrix()).translate({0, -translationSpeed}); // tecla para baixo
+            (*triangle.getTransformationMatrix()).translate({0, -velocity}); // tecla para baixo
 
         if (key == 81)
             (*triangle.getTransformationMatrix()).rotate(rotationSpeed); // tecla Q
