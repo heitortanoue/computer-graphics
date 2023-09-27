@@ -1,14 +1,14 @@
-#ifndef CGSHAPES_H
-#define CGSHAPES_H
+#ifndef CGSHAPES2D_H
+#define CGSHAPES2D_H
 
-#include "CGobjects.h"
+#include "CGobject2D.h"
 
-class CGtriangle : public CGObject
+class CGtriangle : public CGObject2D
 {
-using CGObject::CGObject;
+    using CGObject2D::CGObject2D;
 
 public:
-    CGtriangle() : CGObject(3) {}
+    CGtriangle() : CGObject2D(3) {}
 
     CGtriangle(Vec2 vertices[3], const char *name);
     CGtriangle(Vec2 vertices[3], const char *name, Vec2 initialPos);

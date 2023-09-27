@@ -1,7 +1,7 @@
 #include "CGtypes.h"
 #include "CGobjects.h"
 #include "CGengine.h"
-#include "CGshapes.h"
+#include "CGshapes2D.h"
 
 using namespace std;
 
@@ -36,9 +36,9 @@ int main(void)
             (*triangle.getTransformationMatrix()).rotate(-rotationSpeed); // tecla E
 
         if (key == 90)
-            (*triangle.getTransformationMatrix()).scaleTransform(scaleSpeed); // tecla Z
+            (*triangle.getTransformationMatrix()).scaleTransform2D(scaleSpeed); // tecla Z
         if (key == 88)
-            (*triangle.getTransformationMatrix()).scaleTransform(-scaleSpeed); // tecla X
+            (*triangle.getTransformationMatrix()).scaleTransform2D(-scaleSpeed); // tecla X
     });
 
     CGtriangle triangle2 = CGtriangle(vertices, "Triangulo2", {0.5f, 0.5f});

@@ -13,11 +13,30 @@ void TransformationMatrix::translate(Vec2 tl)
 
 void TransformationMatrix::rotate(float angle)
 {
-    rotation += angle;
+    rotation.x += angle;
     updateMatrix();
 }
 
-void TransformationMatrix::scaleTransform(float scaleFactor)
+void TransformationMatrix::rotate(char axis, float angle)
+{
+    switch (axis)
+    {
+    case 'x':
+        rotation.x += angle;
+        break;
+    case 'y':
+        rotation.y += angle;
+        break;
+    case 'z':
+        rotation.z += angle;
+        break;
+    default:
+        break;
+    }
+    updateMatrix();
+}
+
+void TransformationMatrix::scaleTransform2D(float scaleFactor)
 {
     scale += scaleFactor;
     updateMatrix();
@@ -27,19 +46,34 @@ void TransformationMatrix::multiply(TransformationMatrix &other)
 {
     translation.x += other.translation.x;
     translation.y += other.translation.y;
-    rotation += other.rotation;
+    translation.z += other.translation.z;
+
+    rotation.x += other.rotation.x;
+    rotation.y += other.rotation.y;
+    rotation.z += other.rotation.z;
+
     scale += other.scale;
     updateMatrix();
 }
 
-Vec2 TransformationMatrix::getTranslation()
+Vec2 TransformationMatrix::getTranslation2D()
 {
-    return translation;
+    return Vec2({translation.x, translation.y});
 }
 
-float TransformationMatrix::getRotation()
+Vec3 TransformationMatrix::getTranslation3D()
 {
-    return rotation;
+    return Vec3({translation.x, translation.y, translation.z});
+}
+
+float TransformationMatrix::getRotation2D()
+{
+    return rotation.x;
+}
+
+Vec3 TransformationMatrix::getRotation3D()
+{
+    return Vec3({rotation.x, rotation.y, rotation.z});
 }
 
 float TransformationMatrix::getScale()
@@ -58,33 +92,46 @@ void TransformationMatrix::addVelocity(Vec2 vel)
     velocity.y += vel.y;
 }
 
-Vec2 TransformationMatrix::getVelocity()
+void TransformationMatrix::addVelocity(Vec3 vel)
 {
-    return velocity;
+    velocity.x += vel.x;
+    velocity.y += vel.y;
+    velocity.z += vel.z;
+}
+
+Vec2 TransformationMatrix::getVelocity2D()
+{
+    return Vec2({velocity.x, velocity.y});
+}
+
+Vec3 TransformationMatrix::getVelocity3D()
+{
+    return Vec3({velocity.x, velocity.y, velocity.z});
 }
 
 void TransformationMatrix::updateMatrix()
 {
-    float cosAngle = cos(rotation);
-    float sinAngle = sin(rotation);
+    Vec3 cosAngle = {cos(rotation.x), cos(rotation.y), cos(rotation.z)};
+    Vec3 sinAngle = {sin(rotation.x), sin(rotation.y), sin(rotation.z)};
 
     translation.x += velocity.x;
     translation.y += velocity.y;
+    translation.z += velocity.z;
 
-    transformationMatrix[0] = scale * cosAngle;
-    transformationMatrix[1] = scale * sinAngle;
+    transformationMatrix[0] = scale * cosAngle.x;
+    transformationMatrix[1] = scale * sinAngle.x;
     transformationMatrix[2] = 0.0f;
     transformationMatrix[3] = translation.x;
 
-    transformationMatrix[4] = -scale * sinAngle;
-    transformationMatrix[5] = scale * cosAngle;
+    transformationMatrix[4] = -scale * sinAngle.x;
+    transformationMatrix[5] = scale * cosAngle.x;
     transformationMatrix[6] = 0.0f;
     transformationMatrix[7] = translation.y;
 
     transformationMatrix[8] = 0.0f;
     transformationMatrix[9] = 0.0f;
     transformationMatrix[10] = 1.0f;
-    transformationMatrix[11] = 0.0f;
+    transformationMatrix[11] = translation.z;
 
     transformationMatrix[12] = 0.0f;
     transformationMatrix[13] = 0.0f;

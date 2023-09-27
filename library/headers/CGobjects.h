@@ -8,38 +8,20 @@
 class CGObject
 {
 public:
-    CGObject();
     CGObject(const char* name);
-    CGObject(const int &maxVer) : maxVertices(maxVer) {
-        this->vertices = std::vector<Vec2>();
-        this->vertices.reserve(maxVer);
-    }
-    CGObject(const int &maxVer, const char* name) : maxVertices(maxVer), name(name) {
-        this->vertices = std::vector<Vec2>();
-        this->vertices.reserve(maxVer);
-    }
-    CGObject(const int &maxVer, const char *name, Vec2 initalPos) : maxVertices(maxVer), name(name)
+
+    CGObject(const int& maxVer) : maxVertices(maxVer)
     {
-        this->vertices = std::vector<Vec2>();
-        this->vertices.reserve(maxVer);
-        this->transformation.translate(initalPos);
+        this->name = std::string("Object");
     }
+
+    CGObject(const int& maxVer, const char* name) : maxVertices(maxVer), name(name) {}
 
     inline int getMaxVertices() { return maxVertices; }
-
-    ~CGObject();
-
-    float* getVerticesMatrix();
-    std::vector<Vec2> getVertices();
-    Vec2* getVerticesArray();
-    size_t getVerticesSize();
-
-    void pushVertex(Vec2 vertex);
 
     TransformationMatrix* getTransformationMatrix();
 
     std::string getName() { return name; }
-    void printData();
 
     virtual void keyEvent(int key, int scancode, int action, int mods)
     {
@@ -50,6 +32,11 @@ public:
     }
     virtual void draw() = 0;
 
+    virtual float *getVerticesMatrix() = 0;
+    virtual size_t getVerticesSize() = 0;
+    virtual void printData() = 0;
+    virtual VecBase *getVerticesArray() = 0;
+
     void setKeyEventCallback(std::function<void(int, int, int, int)> callback)
     {
         keyEventCallback = callback;
@@ -58,16 +45,14 @@ public:
     GLuint buffer;
     GLint loc;
 
-private:
-    std::string name;
+protected:
+    const int maxVertices = 0;
 
-    std::vector<Vec2> vertices;
+    std::string name;
 
     TransformationMatrix transformation;
 
     std::function<void(int, int, int, int)> keyEventCallback;
-protected:
-    const int maxVertices = 0;
 };
 
 #endif

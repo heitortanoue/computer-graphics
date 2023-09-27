@@ -178,7 +178,7 @@ void CGengine::initShaders()
 void CGengine::update() {
     glfwPollEvents();
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(1.0, 1.0, 1.0, 1.0);
 }
 
@@ -195,7 +195,7 @@ void CGengine::render() {
 }
 
 void CGengine::addObject(CGObject &obj) {
-    Vec2* vertices = obj.getVerticesArray();
+    auto vertices = obj.getVerticesMatrix();
 
     glGenBuffers(1, &obj.buffer);
     glBindBuffer(GL_ARRAY_BUFFER, obj.buffer);

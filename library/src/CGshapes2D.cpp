@@ -1,8 +1,9 @@
-#include "CGshapes.h"
+#include "CGshapes2D.h"
 #include "CGengine.h"
 #include "CGtypes.h"
+#include "CGobject2D.h"
 
-CGtriangle::CGtriangle(Vec2 vertices[3], const char* newName) : CGObject(3, newName)
+CGtriangle::CGtriangle(Vec2 vertices[3], const char* newName) : CGObject2D(3, newName)
 {
     for (size_t i = 0; i < 3; i++)
     {
@@ -10,7 +11,7 @@ CGtriangle::CGtriangle(Vec2 vertices[3], const char* newName) : CGObject(3, newN
     }
 }
 
-CGtriangle::CGtriangle(Vec2 vertices[3], const char* newName, Vec2 initialPos) : CGObject(3, newName, initialPos)
+CGtriangle::CGtriangle(Vec2 vertices[3], const char *newName, Vec2 initialPos) : CGObject2D(3, newName, initialPos)
 {
     for (size_t i = 0; i < 3; i++)
     {

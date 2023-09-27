@@ -4,31 +4,61 @@
 #include <vector>
 #include <GL/glew.h>
 
-typedef struct
+class VecBase
 {
+public:
+    virtual ~VecBase() {}
+};
+
+class Vec2 : public VecBase
+{
+public:
     float x, y;
-} Vec2;
+
+    Vec2(float _x, float _y) : x(_x), y(_y) {}
+};
+
+class Vec3 : public VecBase
+{
+public:
+    float x, y, z;
+
+    Vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+};
 
 class TransformationMatrix
 {
 public:
     TransformationMatrix() :
-        translation({0.0f, 0.0f}),
-        rotation(0.0f),
+        translation({0.0f, 0.0f, 0.0f}),
+        rotation({0.0f, 0.0f, 0.0f}),
         scale(1.0f),
-        velocity({0.0f, 0.0f}) {}
+        velocity({0.0f, 0.0f, 0.0f}) {}
 
     void translate(Vec2 tl);
+    void translate(Vec3 tl);
+
     void addVelocity(Vec2 vel);
+    void addVelocity(Vec3 vel);
+
     void rotate(float angle);
-    void scaleTransform(float scaleFactor);
+    void rotate(char axis, float angle);
+
+    void scaleTransform2D(float scaleFactor);
+    void scaleTransform3D(float scaleFactor);
 
     void multiply(TransformationMatrix &other);
 
-    Vec2 getTranslation();
-    float getRotation();
+    Vec2 getTranslation2D();
+    Vec3 getTranslation3D();
+
+    float getRotation2D();
+    Vec3 getRotation3D();
+
     float getScale();
-    Vec2 getVelocity();
+
+    Vec2 getVelocity2D();
+    Vec3 getVelocity3D();
 
     float *getMatrix();
     void print();
@@ -38,9 +68,9 @@ public:
     size_t size() { return sizeof(transformationMatrix); }
 
 private:
-    Vec2 translation;
-    Vec2 velocity;
-    float rotation;
+    Vec3 translation;
+    Vec3 velocity;
+    Vec3 rotation;
     float scale;
     float transformationMatrix[16];
 };
