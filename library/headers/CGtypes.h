@@ -32,7 +32,8 @@ public:
     TransformationMatrix() :
         translation({0.0f, 0.0f, 0.0f}),
         rotation({0.0f, 0.0f, 0.0f}),
-        scale(1.0f),
+        scale2D(1.0f),
+        scale3D(1.0f),
         velocity({0.0f, 0.0f, 0.0f}) {}
 
     void translate(Vec2 tl);
@@ -67,11 +68,12 @@ public:
 
     size_t size() { return sizeof(transformationMatrix); }
 
-private:
+protected:
     Vec3 translation;
     Vec3 velocity;
     Vec3 rotation;
-    float scale;
+    float scale2D;
+    float scale3D;
     float transformationMatrix[16];
 };
 

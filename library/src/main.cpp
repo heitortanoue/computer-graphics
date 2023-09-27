@@ -44,11 +44,11 @@ int main(void)
     CGtriangle triangle2 = CGtriangle(vertices, "Triangulo2", {0.5f, 0.5f});
     triangle2.setKeyEventCallback([&triangle2](int key, int scancode, int action, int mods) {
         if (key == 80) {
-            (*triangle2.getTransformationMatrix()).rotate(0.05f); // tecla P
+            (*triangle2.getTransformationMatrix()).rotate('y', 0.05f); // tecla P
         }
 
         if (key == 79) {
-            (*triangle2.getTransformationMatrix()).rotate(-0.05f); // tecla O
+            (*triangle2.getTransformationMatrix()).rotate('y', -0.05f); // tecla O
         }
     });
 

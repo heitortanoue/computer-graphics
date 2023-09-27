@@ -13,7 +13,7 @@ void TransformationMatrix::translate(Vec2 tl)
 
 void TransformationMatrix::rotate(float angle)
 {
-    rotation.x += angle;
+    rotation.z += angle;
     updateMatrix();
 }
 
@@ -38,7 +38,17 @@ void TransformationMatrix::rotate(char axis, float angle)
 
 void TransformationMatrix::scaleTransform2D(float scaleFactor)
 {
-    scale += scaleFactor;
+    scale2D += scaleFactor;
+    scale3D = 1.0f;
+
+    updateMatrix();
+}
+
+void TransformationMatrix::scaleTransform3D(float scaleFactor)
+{
+    scale3D += scaleFactor;
+    scale2D = 1.0f;
+
     updateMatrix();
 }
 
@@ -52,7 +62,9 @@ void TransformationMatrix::multiply(TransformationMatrix &other)
     rotation.y += other.rotation.y;
     rotation.z += other.rotation.z;
 
-    scale += other.scale;
+    scale3D += other.scale3D;
+    scale2D += other.scale2D;
+
     updateMatrix();
 }
 
@@ -68,7 +80,7 @@ Vec3 TransformationMatrix::getTranslation3D()
 
 float TransformationMatrix::getRotation2D()
 {
-    return rotation.x;
+    return rotation.z;
 }
 
 Vec3 TransformationMatrix::getRotation3D()
@@ -78,7 +90,10 @@ Vec3 TransformationMatrix::getRotation3D()
 
 float TransformationMatrix::getScale()
 {
-    return scale;
+    if (scale2D != 1.0f)
+        return scale2D;
+    else
+        return scale3D;
 }
 
 float *TransformationMatrix::getMatrix()
@@ -111,26 +126,28 @@ Vec3 TransformationMatrix::getVelocity3D()
 
 void TransformationMatrix::updateMatrix()
 {
-    Vec3 cosAngle = {cos(rotation.x), cos(rotation.y), cos(rotation.z)};
-    Vec3 sinAngle = {sin(rotation.x), sin(rotation.y), sin(rotation.z)};
+    Vec3 cosAngle = {(float)cos(rotation.x), (float)cos(rotation.y), (float)cos(rotation.z)};
+    Vec3 sinAngle = {(float)sin(rotation.x), (float)sin(rotation.y), (float)sin(rotation.z)};
 
     translation.x += velocity.x;
     translation.y += velocity.y;
     translation.z += velocity.z;
 
-    transformationMatrix[0] = scale * cosAngle.x;
-    transformationMatrix[1] = scale * sinAngle.x;
-    transformationMatrix[2] = 0.0f;
+    float scale = scale2D * scale3D;
+
+    transformationMatrix[0] = scale * cosAngle.z * cosAngle.y;
+    transformationMatrix[1] = scale * sinAngle.z;
+    transformationMatrix[2] = scale3D * -sinAngle.y;
     transformationMatrix[3] = translation.x;
 
-    transformationMatrix[4] = -scale * sinAngle.x;
-    transformationMatrix[5] = scale * cosAngle.x;
-    transformationMatrix[6] = 0.0f;
+    transformationMatrix[4] = scale * -sinAngle.z;
+    transformationMatrix[5] = scale * cosAngle.z * cosAngle.x;
+    transformationMatrix[6] = scale3D * sinAngle.x;
     transformationMatrix[7] = translation.y;
 
-    transformationMatrix[8] = 0.0f;
-    transformationMatrix[9] = 0.0f;
-    transformationMatrix[10] = 1.0f;
+    transformationMatrix[8] = scale3D * sinAngle.y;
+    transformationMatrix[9] = scale3D * -sinAngle.x;
+    transformationMatrix[10] = scale3D * cosAngle.x * cosAngle.y;
     transformationMatrix[11] = translation.z;
 
     transformationMatrix[12] = 0.0f;
