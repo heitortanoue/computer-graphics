@@ -127,5 +127,7 @@ void CGsphere::draw(GLuint program)
     glUniform4f(loc_color, 1.0, 0.0, 0.0, 1.0);
 
     // Desenhe a esfera usando triângulos (GL_TRIANGLES)
-    glDrawArrays(GL_TRIANGLES, 0, sphereVertices.size());
+    for (int i = 0; i < sphereVertices.size(); i += 3){
+        glDrawArrays(GL_TRIANGLES, i, 3);
+    }
 }

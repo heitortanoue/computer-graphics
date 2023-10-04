@@ -101,9 +101,9 @@ class CGsphere : public CGObject3D
     using CGObject3D::CGObject3D;
 
 public:
-    CGsphere() : CGObject3D(0, 0) {} 
+    CGsphere() : CGObject3D(20, 20) {} 
 
-    CGsphere(Vec3 center, float radius, const char *name) : CGObject3D(0, 0, name)
+    CGsphere(Vec3 center, float radius, const char *name) : CGObject3D(20, 20, name)
     {
         generateSphere(center, radius);
         this->name = name;
@@ -122,7 +122,7 @@ private:
         // Define o número de divisões da esfera para obter uma representação mais suave
         int divisions = 20;
 
-        for (int i = 0; i <= divisions; ++i)
+        for (int i = 0; i < divisions; ++i)
         {
             float theta = i * M_PI / divisions; // Ângulo polar
             for (int j = 0; j <= divisions; ++j)
@@ -134,7 +134,7 @@ private:
                 float y = radius * sin(theta) * sin(phi) + center.y;
                 float z = radius * cos(theta) + center.z;
 
-                sphereVertices.push_back({x, y, z});
+                pushVertex({x, y, z});
             }
         }
     }
