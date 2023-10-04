@@ -124,6 +124,51 @@ Vec3 TransformationMatrix::getVelocity3D()
     return Vec3({velocity.x, velocity.y, velocity.z});
 }
 
+void multiplica(float *m1, float *m2, float *m_resultado)
+{
+
+    // OpenGL lida recebe vetores de 16 elementos e interpreta como matrizes 4x4.
+    // Nessa funcao, transformamos as matrizes de volta para float[4][4] para facilitar a multiplicacao
+
+    float m_a[4][4];
+    float m_b[4][4];
+    float m_c[4][4]; // m_c = m_a * m_b
+
+    int n = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            m_a[i][j] = m1[n];
+            m_b[i][j] = m2[n];
+            n += 1;
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            m_c[i][j] = 0.0;
+            for (int k = 0; k < 4; k++)
+            {
+                m_c[i][j] += m_a[i][k] * m_b[k][j];
+            }
+        }
+    }
+
+    // voltando a resposta para o formato do OpenGL
+    n = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            m_resultado[n] = m_c[i][j];
+            n += 1;
+        }
+    }
+}
+
 void TransformationMatrix::updateMatrix()
 {
     Vec3 cosAngle = {(float)cos(rotation.x), (float)cos(rotation.y), (float)cos(rotation.z)};
@@ -135,25 +180,46 @@ void TransformationMatrix::updateMatrix()
 
     float scale = scale2D * scale3D;
 
-    transformationMatrix[0] = scale * cosAngle.z * cosAngle.y;
-    transformationMatrix[1] = scale * sinAngle.z;
-    transformationMatrix[2] = scale3D * -sinAngle.y;
-    transformationMatrix[3] = translation.x;
+    float rotationX[16] = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, cosAngle.x, -sinAngle.x, 0.0f,
+        0.0f, sinAngle.x, cosAngle.x, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f};
 
-    transformationMatrix[4] = scale * -sinAngle.z;
-    transformationMatrix[5] = scale * cosAngle.z * cosAngle.x;
-    transformationMatrix[6] = scale3D * sinAngle.x;
-    transformationMatrix[7] = translation.y;
+    float rotationY[16] = {
+        cosAngle.y, 0.0f, sinAngle.y, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        -sinAngle.y, 0.0f, cosAngle.y, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f};
 
-    transformationMatrix[8] = scale3D * sinAngle.y;
-    transformationMatrix[9] = scale3D * -sinAngle.x;
-    transformationMatrix[10] = scale3D * cosAngle.x * cosAngle.y;
-    transformationMatrix[11] = translation.z;
+    float rotationZ[16] = {
+        cosAngle.z, -sinAngle.z, 0.0f, 0.0f,
+        sinAngle.z, cosAngle.z, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0,
+        0.0f, 0.0f, 0.0f, 1.0f};
 
-    transformationMatrix[12] = 0.0f;
-    transformationMatrix[13] = 0.0f;
-    transformationMatrix[14] = 0.0f;
-    transformationMatrix[15] = 1.0f;
+    float translationMatrix[16] = {
+        1.0f, 0.0f, 0.0f, translation.x,
+        0.0f, 1.0f, 0.0f, translation.y,
+        0.0f, 0.0f, 1.0f, translation.z,
+        0.0f, 0.0f, 0.0f, 1.0f};
+
+    float scaleMatrix[16] = {
+        scale, 0.0f, 0.0f, 0.0f,
+        0.0f, scale, 0.0f, 0.0f,
+        0.0f, 0.0f, scale3D, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f};
+
+    float finalMatrix[16] = {
+        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 0.0f};
+
+    multiplica(rotationZ, rotationX, this->getMatrix());
+    multiplica(rotationY, this->getMatrix(), this->getMatrix());
+    multiplica(translationMatrix, this->getMatrix(), this->getMatrix());
+    multiplica(scaleMatrix, this->getMatrix(), this->getMatrix());
 }
 
 

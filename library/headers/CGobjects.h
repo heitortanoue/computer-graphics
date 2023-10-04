@@ -30,16 +30,29 @@ public:
             keyEventCallback(key, scancode, action, mods);
         }
     }
-    virtual void draw() = 0;
+    virtual void draw(GLuint program) = 0;
 
-    virtual float *getVerticesMatrix() = 0;
+    virtual VecBase *getVerticesMatrix() = 0;
     virtual size_t getVerticesSize() = 0;
     virtual void printData() = 0;
-    virtual VecBase *getVerticesArray() = 0;
+    virtual GLVec3* verticesToGLVec3() = 0;
 
     void setKeyEventCallback(std::function<void(int, int, int, int)> callback)
     {
         keyEventCallback = callback;
+    }
+
+    void setConstantMotion(std::function<void()> callback)
+    {
+        constantMotionCallback = callback;
+    }
+
+    void executeConstantMotion()
+    {
+        if (constantMotionCallback)
+        {
+            constantMotionCallback();
+        }
     }
 
     GLuint buffer;
@@ -53,6 +66,7 @@ protected:
     TransformationMatrix transformation;
 
     std::function<void(int, int, int, int)> keyEventCallback;
+    std::function<void()> constantMotionCallback;
 };
 
 #endif

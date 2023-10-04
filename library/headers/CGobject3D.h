@@ -11,18 +11,18 @@ class CGObject3D : public CGObject
 {
 public:
     CGObject3D();
-    CGObject3D(const char *name);
-    CGObject3D(const int &maxVer) : CGObject(maxVer)
+    CGObject3D(const char *name, const int &nV) : neededVertices(nV), CGObject(name) {}
+    CGObject3D(const int &maxVer, const int &nV) : neededVertices(nV), CGObject(maxVer)
     {
         this->vertices = std::vector<Vec3>();
         this->vertices.reserve(maxVer);
     }
-    CGObject3D(const int &maxVer, const char *name) : CGObject(maxVer, name)
+    CGObject3D(const int &maxVer, const int &nV, const char *name) : neededVertices(nV), CGObject(maxVer, name)
     {
         this->vertices = std::vector<Vec3>();
         this->vertices.reserve(maxVer);
     }
-    CGObject3D(const int &maxVer, const char *name, Vec3 initalPos) : CGObject(maxVer, name)
+    CGObject3D(const int &maxVer, const int &nV, const char *name, Vec3 initalPos) : neededVertices(nV), CGObject(maxVer, name)
     {
         this->vertices = std::vector<Vec3>();
         this->vertices.reserve(maxVer);
@@ -33,15 +33,17 @@ public:
 
     std::vector<Vec3> getVertices();
 
-    Vec3 *getVerticesArray() override;
-    float *getVerticesMatrix() override;
+    Vec3 *getVerticesMatrix() override;
     size_t getVerticesSize() override;
     void printData() override;
+    GLVec3 *verticesToGLVec3() override;
 
     void pushVertex(Vec3 vertex);
 
 private:
     std::vector<Vec3> vertices;
+
+    const int neededVertices = 0;
 };
 
 #endif

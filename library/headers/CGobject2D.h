@@ -34,10 +34,10 @@ public:
 
     std::vector<Vec2> getVertices();
 
-    Vec2 *getVerticesArray() override;
-    float *getVerticesMatrix() override;
+    Vec2 *getVerticesMatrix() override;
     size_t getVerticesSize() override;
     void printData() override;
+    GLVec3 *verticesToGLVec3() override;
 
     void pushVertex(Vec2 vertex);
 

@@ -5,17 +5,9 @@ CGObject3D::~CGObject3D()
     vertices.clear();
 }
 
-float *CGObject3D::getVerticesMatrix()
+Vec3 *CGObject3D::getVerticesMatrix()
 {
-    float *verticesMatrix = new float[vertices.size() * 3];
-    for (size_t i = 0; i < vertices.size(); i++)
-    {
-        verticesMatrix[i * 3] = vertices[i].x;
-        verticesMatrix[i * 3 + 1] = vertices[i].y;
-        verticesMatrix[i * 3 + 2] = vertices[i].z;
-
-    }
-    return verticesMatrix;
+    return vertices.data();
 }
 
 std::vector<Vec3> CGObject3D::getVertices()
@@ -23,14 +15,23 @@ std::vector<Vec3> CGObject3D::getVertices()
     return vertices;
 }
 
-Vec3 *CGObject3D::getVerticesArray()
-{
-    return vertices.data();
+GLVec3 *CGObject3D::verticesToGLVec3() {
+    GLVec3* glVertices = new GLVec3[this->getVerticesSize()];
+    Vec3* vertices = getVerticesMatrix();
+
+    for (size_t i = 0; i < this->getVerticesSize(); i++)
+    {
+        glVertices[i].x = vertices[i].x;
+        glVertices[i].y = vertices[i].y;
+        glVertices[i].z = vertices[i].z;
+    }
+
+    return glVertices;
 }
 
 size_t CGObject3D::getVerticesSize()
 {
-    return vertices.size() * sizeof(Vec3);
+    return neededVertices;
 }
 
 void CGObject3D::pushVertex(Vec3 vertex)

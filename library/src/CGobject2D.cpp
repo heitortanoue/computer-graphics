@@ -5,15 +5,9 @@ CGObject2D::~CGObject2D()
     vertices.clear();
 }
 
-float *CGObject2D::getVerticesMatrix()
+Vec2 *CGObject2D::getVerticesMatrix()
 {
-    float *verticesMatrix = new float[vertices.size() * 2];
-    for (size_t i = 0; i < vertices.size(); i++)
-    {
-        verticesMatrix[i * 2] = vertices[i].x;
-        verticesMatrix[i * 2 + 1] = vertices[i].y;
-    }
-    return verticesMatrix;
+    return vertices.data();
 }
 
 std::vector<Vec2> CGObject2D::getVertices()
@@ -21,14 +15,23 @@ std::vector<Vec2> CGObject2D::getVertices()
     return vertices;
 }
 
-Vec2* CGObject2D::getVerticesArray()
-{
-    return vertices.data();
-}
-
 size_t CGObject2D::getVerticesSize()
 {
-    return vertices.size() * sizeof(Vec2);
+    return vertices.size();
+}
+
+GLVec3 *CGObject2D::verticesToGLVec3()
+{
+    GLVec3 *glVertices = new GLVec3[vertices.size()];
+
+    for (size_t i = 0; i < vertices.size(); i++)
+    {
+        glVertices[i].x = vertices[i].x;
+        glVertices[i].y = vertices[i].y;
+        glVertices[i].z = 0;
+    }
+
+    return glVertices;
 }
 
 void CGObject2D::pushVertex(Vec2 vertex)

@@ -24,7 +24,7 @@ CGtriangle::~CGtriangle()
 
 }
 
-void CGtriangle::draw()
+void CGtriangle::draw(GLuint program)
 {
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }

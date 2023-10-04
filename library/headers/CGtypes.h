@@ -4,17 +4,24 @@
 #include <vector>
 #include <GL/glew.h>
 
+typedef struct
+{
+    float x, y, z;
+} GLVec3;
+
 class VecBase
 {
 public:
     virtual ~VecBase() {}
+
+    float* getMatrix() { return (float*)this; }
 };
 
 class Vec2 : public VecBase
 {
 public:
     float x, y;
-
+    Vec2() : x(0), y(0){}
     Vec2(float _x, float _y) : x(_x), y(_y) {}
 };
 
@@ -22,7 +29,7 @@ class Vec3 : public VecBase
 {
 public:
     float x, y, z;
-
+    Vec3(): x(0), y(0), z(0) {}
     Vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
 };
 

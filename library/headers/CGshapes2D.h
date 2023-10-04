@@ -14,7 +14,7 @@ public:
     CGtriangle(Vec2 vertices[3], const char *name, Vec2 initialPos);
     ~CGtriangle();
 
-    void draw();
+    void draw(GLuint program);
 
 private:
 

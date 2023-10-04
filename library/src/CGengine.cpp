@@ -66,6 +66,7 @@ void CGengine::init()
 
     glfwSetKeyCallback(window, keyEvent);
     glfwShowWindow(window);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void CGengine::initWindow()
@@ -116,11 +117,11 @@ void CGengine::initShaders()
 
     // GLSL para Vertex Shader
     const char *vertex_code =
-        "attribute vec2 position;\n"
+        "attribute vec3 position;\n"
         "uniform mat4 mat_transformation;\n"
         "void main()\n"
         "{\n"
-        "    gl_Position = mat_transformation * vec4(position, 0.0, 1.0);\n"
+        "    gl_Position = mat_transformation * vec4(position, 1.0);\n"
         "}\n";
 
     // GLSL para Fragment Shader
@@ -128,7 +129,7 @@ void CGengine::initShaders()
         "uniform vec4 color;\n"
         "void main()\n"
         "{\n"
-        "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+        "    gl_FragColor = color;\n"
         "}\n";
 
     program = glCreateProgram();
@@ -187,7 +188,8 @@ void CGengine::render() {
         object->loc = glGetUniformLocation(program, "mat_transformation");
         glUniformMatrix4fv(object->loc, 1, GL_TRUE, (*object->getTransformationMatrix()).getMatrix());
 
-        object->draw();
+        object->draw(this->program);
+        object->executeConstantMotion();
         object->getTransformationMatrix()->updateMatrix();
     }
 
@@ -195,16 +197,18 @@ void CGengine::render() {
 }
 
 void CGengine::addObject(CGObject &obj) {
-    auto vertices = obj.getVerticesMatrix();
+    GLVec3* vertices = obj.verticesToGLVec3();
+
+    size_t verticesSize = obj.getVerticesSize() * sizeof(vertices[0]);
 
     glGenBuffers(1, &obj.buffer);
     glBindBuffer(GL_ARRAY_BUFFER, obj.buffer);
 
-    glBufferData(GL_ARRAY_BUFFER, obj.getVerticesSize(), vertices, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices, GL_STATIC_DRAW);
 
     obj.loc = glGetAttribLocation(program, "position");
     glEnableVertexAttribArray(obj.loc);
-    glVertexAttribPointer(obj.loc, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void *)0);
+    glVertexAttribPointer(obj.loc, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void *)0);
 
     objects.push_back(shared_ptr<CGObject>(&obj));
 }

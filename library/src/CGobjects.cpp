@@ -1,5 +1,6 @@
 #include "CGobjects.h"
 #include "CGengine.h"
+#include "CGtypes.h"
 
 CGObject::CGObject(const char* name)
 {

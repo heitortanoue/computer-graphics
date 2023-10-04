@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++11 -o3
 LDFLAGS = -lglfw -lGL -lGLEW -lm
 
 SRC_DIR = src
