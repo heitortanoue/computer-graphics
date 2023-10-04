@@ -99,3 +99,33 @@ void CGpyramid::draw(GLuint program)
     glUniform4f(loc_color, 0.5, 0.5, 0.5, 1.0); // ### cinza
     glDrawArrays(GL_TRIANGLE_STRIP, 12, 4);          // Desenhe a face superior
 }
+
+
+// ====================================
+// SPHERE
+
+CGsphere::~CGsphere()
+{
+}
+
+Vec3 *CGsphere::getVerticesMatrix()
+{
+    Vec3 *verticesMatrix = new Vec3[sphereVertices.size()];
+    for (size_t i = 0; i < sphereVertices.size(); ++i)
+    {
+        verticesMatrix[i] = sphereVertices[i];
+    }
+    return verticesMatrix;
+}
+
+void CGsphere::draw(GLuint program)
+{
+    // Recupere a localização da variável de cor do programa GLSL
+    GLint loc_color = glGetUniformLocation(program, "color");
+
+    // Defina a cor da esfera (por exemplo, vermelho)
+    glUniform4f(loc_color, 1.0, 0.0, 0.0, 1.0);
+
+    // Desenhe a esfera usando triângulos (GL_TRIANGLES)
+    glDrawArrays(GL_TRIANGLES, 0, sphereVertices.size());
+}

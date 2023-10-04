@@ -3,6 +3,7 @@
 
 #include "CGtypes.h"
 #include <iostream>
+#include <cmath>
 #include <functional>
 
 class CGObject
