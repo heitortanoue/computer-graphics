@@ -101,9 +101,9 @@ class CGsphere : public CGObject3D
     using CGObject3D::CGObject3D;
 
 public:
-    CGsphere() : CGObject3D(20, 20) {} 
+    CGsphere() : CGObject3D(0, (int)pow(divisions, 2)) {}
 
-    CGsphere(Vec3 center, float radius, const char *name) : CGObject3D(20, 20, name)
+    CGsphere(Vec3 center, float radius, const char *name) : CGObject3D(0, (int)pow(divisions, 2), name)
     {
         generateSphere(center, radius);
         this->name = name;
@@ -115,13 +115,10 @@ public:
     void draw(GLuint program);
 
 private:
-    std::vector<Vec3> sphereVertices;
-
     void generateSphere(Vec3 center, float radius)
     {
         // Define o número de divisões da esfera para obter uma representação mais suave
-        int divisions = 20;
-
+        int qnt = 0;
         for (int i = 0; i < divisions; ++i)
         {
             float theta = i * M_PI / divisions; // Ângulo polar
@@ -134,10 +131,14 @@ private:
                 float y = radius * sin(theta) * sin(phi) + center.y;
                 float z = radius * cos(theta) + center.z;
 
+                qnt++;
+                std::cout << qnt << " " << x << " " << y << " " << z << std::endl;
                 pushVertex({x, y, z});
             }
         }
     }
+
+    const int divisions = 20;
 };
 
 #endif

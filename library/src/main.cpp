@@ -13,15 +13,15 @@ int main(void)
 {
     CGengine engine;
 
-    // CGcube cube = CGcube({-.1f, -.1f, 0}, .1f, "Cubo");
+    CGcube cube = CGcube({-.1f, -.1f, 0}, .1f, "Cubo");
 
-    // cube.setConstantMotion([&]() {
-    //     (*cube.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
-    //     (*cube.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);
-    //     (*cube.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
-    // });
+    cube.setConstantMotion([&]() {
+        (*cube.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
+        (*cube.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);
+        (*cube.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
+    });
 
-    // engine.addObject(cube);
+    engine.addObject(cube);
 /*
     CGpyramid pyramid = CGpyramid({.4f,.4f,0}, .2f, .3f, "Pyramid");
 
@@ -34,7 +34,8 @@ int main(void)
     engine.addObject(pyramid);*/
 
     // cria a esfera
-    CGsphere sphere = CGsphere({.4f, .4f, 0}, .2f, "Esfera");
+    CGsphere sphere = CGsphere({0,0,0}, .2f, "Esfera");
+
     sphere.setConstantMotion([&]() {
         (*sphere.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
         (*sphere.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);

@@ -110,12 +110,8 @@ CGsphere::~CGsphere()
 
 Vec3 *CGsphere::getVerticesMatrix()
 {
-    Vec3 *verticesMatrix = new Vec3[sphereVertices.size()];
-    for (size_t i = 0; i < sphereVertices.size(); ++i)
-    {
-        verticesMatrix[i] = sphereVertices[i];
-    }
-    return verticesMatrix;
+    auto vertices = getVertices();
+    return vertices.data();
 }
 
 void CGsphere::draw(GLuint program)
@@ -123,11 +119,14 @@ void CGsphere::draw(GLuint program)
     // Recupere a localização da variável de cor do programa GLSL
     GLint loc_color = glGetUniformLocation(program, "color");
 
-    // Defina a cor da esfera (por exemplo, vermelho)
-    glUniform4f(loc_color, 1.0, 0.0, 0.0, 1.0);
-
     // Desenhe a esfera usando triângulos (GL_TRIANGLES)
-    for (int i = 0; i < sphereVertices.size(); i += 3){
+    for (int i = 0; i < this->getVerticesSize(); i += 3){
+        //gera cor aleatoria
+        float r = (float)rand() / (float)RAND_MAX;
+        float g = (float)rand() / (float)RAND_MAX;
+        float b = (float)rand() / (float)RAND_MAX;
+
+        glUniform4f(loc_color, r, g, b, 1.0);
         glDrawArrays(GL_TRIANGLES, i, 3);
     }
 }
