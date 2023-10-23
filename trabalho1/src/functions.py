@@ -1,17 +1,21 @@
 import os
 import glm
 
-def getAveragePosition(modelo):
+def getAveragePosition(modelo, scale):
     x = 0
     y = 0
     z = 0
+    
     lenVertices = len(modelo["vertices"])
+    if lenVertices == 0:
+        return None
+    
     for obj in modelo["vertices"]:
         x += float(obj[0])
         y += float(obj[1])
         z += float(obj[2])
 
-    averageVector = glm.vec3(x/lenVertices, y/lenVertices, z/lenVertices)
+    averageVector = glm.vec3((x*scale)/lenVertices, (y*scale)/lenVertices, (z*scale)/lenVertices)
 
     return averageVector
 

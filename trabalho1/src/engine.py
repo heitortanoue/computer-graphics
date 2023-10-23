@@ -261,16 +261,16 @@ class Engine:
             print(modelOnFocus.scale)
             modelOnFocus.scale *= (1 - 0.2)
 
-        if key == glfw.KEY_W and modelOnFocus.translation.y <= 0.99:
+        if key == glfw.KEY_W and modelOnFocus.translation.y <= (0.99+modelOnFocus.middle.y):
             modelOnFocus.translation.y += 0.01
         
-        if key == glfw.KEY_S and modelOnFocus.translation.y >= -0.99:
+        if key == glfw.KEY_S and modelOnFocus.translation.y >= -(0.99+modelOnFocus.middle.y):
             modelOnFocus.translation.y -= 0.01
         
-        if key == glfw.KEY_A and modelOnFocus.translation.x >= -0.99:
+        if key == glfw.KEY_A and modelOnFocus.translation.x >= -(0.99+modelOnFocus.middle.x):
             modelOnFocus.translation.x -= 0.01
 
-        if key == glfw.KEY_D and modelOnFocus.translation.x <= 0.99:
+        if key == glfw.KEY_D and modelOnFocus.translation.x <= (0.99+modelOnFocus.middle.x):
             modelOnFocus.translation.x += 0.01
 
         # rotation using the arrow keys
