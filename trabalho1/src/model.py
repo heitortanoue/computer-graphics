@@ -22,8 +22,8 @@ class Model:
         self.translation = translation
 
         self.mat_transform = glm.mat4(1)
-        self.mat_transform = glm.scale(self.mat_transform, glm.vec3(scale, scale, scale))
+        self.mat_transform = glm.translate(self.mat_transform, translation)
         self.mat_transform = glm.rotate(self.mat_transform, rotation.x, glm.vec3(1, 0, 0))
         self.mat_transform = glm.rotate(self.mat_transform, rotation.y, glm.vec3(0, 1, 0))
         self.mat_transform = glm.rotate(self.mat_transform, rotation.z, glm.vec3(0, 0, 1))
-        self.mat_transform = glm.translate(self.mat_transform, translation)
+        self.mat_transform = glm.scale(self.mat_transform, glm.vec3(scale, scale, scale))
