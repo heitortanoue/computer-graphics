@@ -73,16 +73,15 @@ class Engine:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             glClearColor(1.0, 1.0, 1.0, 1.0)
 
+            # seleciona o objeto a ser desenhado
             model = self.objects[self.objectOnFocus]
 
+            # muda o buffer para o do objeto selecionado
             self.switchBuffers(model)
 
-            model.mat_transform = glm.mat4(1)
-
-            avgPos = getAveragePosition(model.model)
             angle = glfw.get_time() * math.pi / 10
 
-            model.applyTransformations(model.scale, glm.vec3(0, angle, 0), avgPos * -model.scale)
+            model.applyTransformations(model.scale, glm.vec3(0, angle, 0), model.translation * model.scale)
 
             loc_mat_transform = glGetUniformLocation(self.program, "mat_transform")
             glUniformMatrix4fv(loc_mat_transform, 1, GL_FALSE, glm.value_ptr(model.mat_transform))
@@ -244,7 +243,22 @@ class Engine:
         modelOnFocus = self.objects[self.objectOnFocus]
 
         if key == glfw.KEY_Z and action == glfw.PRESS:
-            modelOnFocus.scale *= (1 + .2)
+            print(modelOnFocus.scale)
+            if modelOnFocus.scale < 1:
+                modelOnFocus.scale *= (1 + .2)
 
         if key == glfw.KEY_X and action == glfw.PRESS:
+            print(modelOnFocus.scale)
             modelOnFocus.scale *= (1 - 0.2)
+
+        if key == glfw.KEY_W and action == glfw.PRESS:
+            modelOnFocus.translation.y += 0.1
+        
+        if key == glfw.KEY_S and action == glfw.PRESS:
+            modelOnFocus.translation.y -= 0.1
+        
+        if key == glfw.KEY_A and action == glfw.PRESS:
+            modelOnFocus.translation.x -= 0.1
+
+        if key == glfw.KEY_D and action == glfw.PRESS:
+            modelOnFocus.translation.x += 0.1
