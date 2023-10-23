@@ -275,3 +275,9 @@ class Engine:
         
         if key == glfw.KEY_RIGHT:
             modelOnFocus.rotation.y -= 0.1 * math.pi / 10
+
+        if key == glfw.KEY_M:
+            modelOnFocus.rotation.z += 0.1 * math.pi / 10
+        
+        if key == glfw.KEY_N:
+            modelOnFocus.rotation.z -= 0.1 * math.pi / 10
