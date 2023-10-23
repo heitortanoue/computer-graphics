@@ -152,6 +152,7 @@ class Engine:
 
     def showWindow(self):
         self.polygonal_mode = False
+        self.texture_filter = False
         glfw.show_window(self.window)
         glfw.set_key_callback(self.window, key_event_static)
         glEnable(GL_DEPTH_TEST) ### importante para 3D
@@ -235,6 +236,15 @@ class Engine:
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
             else:
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        
+        if key == glfw.KEY_V and action == glfw.PRESS:
+            self.texture_filter = not self.texture_filter
+            if self.texture_filter:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+            else:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
         if key >= glfw.KEY_1 and key <= glfw.KEY_5 and action == glfw.PRESS:
             self.objectOnFocus = key - glfw.KEY_1
