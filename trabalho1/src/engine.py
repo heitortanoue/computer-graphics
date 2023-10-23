@@ -79,9 +79,7 @@ class Engine:
             # muda o buffer para o do objeto selecionado
             self.switchBuffers(model)
 
-            angle = glfw.get_time() * math.pi / 10
-
-            model.applyTransformations(model.scale, glm.vec3(0, angle, 0), model.translation)
+            model.applyTransformations(model.scale, model.rotation, model.translation)
 
             loc_mat_transform = glGetUniformLocation(self.program, "mat_transform")
             glUniformMatrix4fv(loc_mat_transform, 1, GL_FALSE, glm.value_ptr(model.mat_transform))
@@ -253,14 +251,27 @@ class Engine:
             print(modelOnFocus.scale)
             modelOnFocus.scale *= (1 - 0.2)
 
-        if key == glfw.KEY_W and action == glfw.PRESS and modelOnFocus.translation.y <= 0.9:
-            modelOnFocus.translation.y += 0.1
+        if key == glfw.KEY_W and modelOnFocus.translation.y <= 0.99:
+            modelOnFocus.translation.y += 0.01
         
-        if key == glfw.KEY_S and action == glfw.PRESS and modelOnFocus.translation.y >= -0.9:
-            modelOnFocus.translation.y -= 0.1
+        if key == glfw.KEY_S and modelOnFocus.translation.y >= -0.99:
+            modelOnFocus.translation.y -= 0.01
         
-        if key == glfw.KEY_A and action == glfw.PRESS and modelOnFocus.translation.x >= -0.9:
-            modelOnFocus.translation.x -= 0.1
+        if key == glfw.KEY_A and modelOnFocus.translation.x >= -0.99:
+            modelOnFocus.translation.x -= 0.01
 
-        if key == glfw.KEY_D and action == glfw.PRESS and modelOnFocus.translation.x <= 0.9:
-            modelOnFocus.translation.x += 0.1
+        if key == glfw.KEY_D and modelOnFocus.translation.x <= 0.99:
+            modelOnFocus.translation.x += 0.01
+
+        # rotation using the arrow keys
+        if key == glfw.KEY_UP:
+            modelOnFocus.rotation.x += 0.1 * math.pi / 10
+
+        if key == glfw.KEY_DOWN:
+            modelOnFocus.rotation.x -= 0.1 * math.pi / 10
+
+        if key == glfw.KEY_LEFT:
+            modelOnFocus.rotation.y += 0.1 * math.pi / 10
+        
+        if key == glfw.KEY_RIGHT:
+            modelOnFocus.rotation.y -= 0.1 * math.pi / 10
