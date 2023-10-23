@@ -13,7 +13,7 @@ class Model:
         self.scale = .1
         self.rotation = glm.vec3(0,0,0)
         avgPos = getAveragePosition(self.model)
-        self.translation = glm.vec3(-avgPos.x, -avgPos.y, -avgPos.z)
+        self.translation = glm.vec3(0,0,0)
         self.mat_transform = glm.translate(self.mat_transform, self.translation)
 
     def applyTransformations(self, scale, rotation, translation):

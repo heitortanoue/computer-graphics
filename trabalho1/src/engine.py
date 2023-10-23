@@ -85,6 +85,8 @@ class Engine:
 
             loc_mat_transform = glGetUniformLocation(self.program, "mat_transform")
             glUniformMatrix4fv(loc_mat_transform, 1, GL_FALSE, glm.value_ptr(model.mat_transform))
+            print(model.mat_transform)
+            print(model.translation)
 
             self.drawModels(model)
 
@@ -251,14 +253,14 @@ class Engine:
             print(modelOnFocus.scale)
             modelOnFocus.scale *= (1 - 0.2)
 
-        if key == glfw.KEY_W and action == glfw.PRESS:
+        if key == glfw.KEY_W and action == glfw.PRESS and modelOnFocus.translation.y <= 0.9:
             modelOnFocus.translation.y += 0.1
         
-        if key == glfw.KEY_S and action == glfw.PRESS:
+        if key == glfw.KEY_S and action == glfw.PRESS and modelOnFocus.translation.y >= -0.9:
             modelOnFocus.translation.y -= 0.1
         
-        if key == glfw.KEY_A and action == glfw.PRESS:
+        if key == glfw.KEY_A and action == glfw.PRESS and modelOnFocus.translation.x >= -0.9:
             modelOnFocus.translation.x -= 0.1
 
-        if key == glfw.KEY_D and action == glfw.PRESS:
+        if key == glfw.KEY_D and action == glfw.PRESS and modelOnFocus.translation.x <= 0.9:
             modelOnFocus.translation.x += 0.1
