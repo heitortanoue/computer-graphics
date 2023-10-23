@@ -81,7 +81,7 @@ class Engine:
 
             angle = glfw.get_time() * math.pi / 10
 
-            model.applyTransformations(model.scale, glm.vec3(0, angle, 0), model.translation * model.scale)
+            model.applyTransformations(model.scale, glm.vec3(0, angle, 0), model.translation)
 
             loc_mat_transform = glGetUniformLocation(self.program, "mat_transform")
             glUniformMatrix4fv(loc_mat_transform, 1, GL_FALSE, glm.value_ptr(model.mat_transform))
