@@ -15,7 +15,7 @@ def getAveragePosition(modelo, scale):
         y += float(obj[1])
         z += float(obj[2])
 
-    averageVector = glm.vec3((x*scale)/lenVertices, (y*scale)/lenVertices, (z*scale)/lenVertices)
+    averageVector = glm.vec3(x/lenVertices, y/lenVertices, z/lenVertices)
 
     return averageVector
 

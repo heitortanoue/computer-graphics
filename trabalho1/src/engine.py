@@ -42,6 +42,9 @@ fragment_code = """
         """
 
 class Engine:
+    boundaries = glm.vec4(0,0,0,0)
+    position = glm.vec3(0,0,0)
+    
     def __init__(self):
         if not glfw.init():
             raise Exception("Failed to initialize GLFW")
@@ -75,6 +78,10 @@ class Engine:
 
             # seleciona o objeto a ser desenhado
             model = self.objects[self.objectOnFocus]
+            if self.objectOnFocus == 0:
+                self.boundaries = glm.vec4(0.89,-0.89,0.15,-0.89)
+            elif self.objectOnFocus == 1:
+                self.boundaries = glm.vec4(0.57,-0.67,-0.35,-0.98)
 
             # muda o buffer para o do objeto selecionado
             self.switchBuffers(model)
@@ -85,6 +92,7 @@ class Engine:
             glUniformMatrix4fv(loc_mat_transform, 1, GL_FALSE, glm.value_ptr(model.mat_transform))
             print(model.mat_transform)
             print(model.translation)
+            print(self.boundaries)
 
             self.drawModels(model)
 
@@ -175,8 +183,13 @@ class Engine:
     def loadModel(self, model):
         print('Loading Model `' + model + '` ...')
 
+        if model == "capsule":
+            self.position = glm.vec3(0,-0.37,0)
+        elif model == "monstro":
+            self.position = glm.vec3(-0.05,-0.65,0)
+
         modelIndex = len(self.objects)
-        modelo = Model(model)
+        modelo = Model(model, self.position)
 
         # Request a buffer slot from GPU
         modelo.buffer = glGenBuffers(2)
@@ -261,16 +274,16 @@ class Engine:
             print(modelOnFocus.scale)
             modelOnFocus.scale *= (1 - 0.2)
 
-        if key == glfw.KEY_W and modelOnFocus.translation.y <= (0.99+modelOnFocus.middle.y):
+        if key == glfw.KEY_W and modelOnFocus.translation[1] < self.boundaries[2]:
             modelOnFocus.translation.y += 0.01
         
-        if key == glfw.KEY_S and modelOnFocus.translation.y >= -(0.99+modelOnFocus.middle.y):
+        if key == glfw.KEY_S and modelOnFocus.translation[1] > self.boundaries[3]:
             modelOnFocus.translation.y -= 0.01
         
-        if key == glfw.KEY_A and modelOnFocus.translation.x >= -(0.99+modelOnFocus.middle.x):
+        if key == glfw.KEY_A and modelOnFocus.translation[0] > self.boundaries[1]:
             modelOnFocus.translation.x -= 0.01
 
-        if key == glfw.KEY_D and modelOnFocus.translation.x <= (0.99+modelOnFocus.middle.x):
+        if key == glfw.KEY_D and modelOnFocus.translation[0] < self.boundaries[0]:
             modelOnFocus.translation.x += 0.01
 
         # rotation using the arrow keys
