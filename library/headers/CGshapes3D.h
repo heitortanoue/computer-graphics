@@ -95,50 +95,36 @@ public:
     void draw(GLuint program);
 };
 
-// SPHERE
-class CGsphere : public CGObject3D
+// CYLINDER
+
+class CGcylinder : public CGObject3D
 {
     using CGObject3D::CGObject3D;
 
 public:
-    CGsphere() : CGObject3D(0, (int)pow(divisions, 2)) {}
-
-    CGsphere(Vec3 center, float radius, const char *name) : CGObject3D(0, (int)pow(divisions, 2), name)
+    CGcylinder(Vec3 origin, float radius, float height, int numSegments, const char* name) : CGObject3D((numSegments + 1) * 2, numSegments * 6, name)
     {
-        generateSphere(center, radius);
+        float theta;
+        for (int i = 0; i < numSegments; i++){
+            theta = 2 * M_PI * (i/numSegments);
+            Vec3 verticeUp = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z + height/2};
+            Vec3 verticeDown = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z - height/2};
+            pushVertex (verticeUp);
+            pushVertex (verticeDown);
+        }
+
         this->name = name;
+        this->numSegments = numSegments;
     }
 
-    ~CGsphere();
+    ~CGcylinder();
 
     Vec3* getVerticesMatrix() override;
     void draw(GLuint program);
 
 private:
-    void generateSphere(Vec3 center, float radius)
-    {
-        // Define o número de divisões da esfera para obter uma representação mais suave
-        int qnt = 0;
-        for (int i = 0; i < divisions; ++i)
-        {
-            float theta = i * M_PI / divisions; // Ângulo polar
-            for (int j = 0; j <= divisions; ++j)
-            {
-                float phi = j * 2 * M_PI / divisions; // Ângulo azimutal
-
-                // Calcula as coordenadas dos vértices da esfera
-                float x = radius * sin(theta) * cos(phi) + center.x;
-                float y = radius * sin(theta) * sin(phi) + center.y;
-                float z = radius * cos(theta) + center.z;
-
-                qnt++;
-                std::cout << qnt << " " << x << " " << y << " " << z << std::endl;
-                pushVertex({x, y, z});
-            }
-        }
-    }
-
-    const int divisions = 20;
+    int numSegments;
+    void createCylinderGeometry(float radius, float height, int numSegments);
 };
 
 #endif

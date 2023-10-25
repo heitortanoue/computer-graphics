@@ -1,4 +1,5 @@
 #include "CGshapes3D.h"
+#include <cmath>
 
 CGcube::~CGcube()
 {
@@ -100,33 +101,25 @@ void CGpyramid::draw(GLuint program)
     glDrawArrays(GL_TRIANGLE_STRIP, 12, 4);          // Desenhe a face superior
 }
 
-
 // ====================================
-// SPHERE
+// CYLINDER
 
-CGsphere::~CGsphere()
+CGcylinder::~CGcylinder()
 {
 }
 
-Vec3 *CGsphere::getVerticesMatrix()
+Vec3 *CGcylinder::getVerticesMatrix()
 {
-    auto vertices = getVertices();
-    return vertices.data();
 }
 
-void CGsphere::draw(GLuint program)
+void CGcylinder::draw(GLuint program)
 {
-    // Recupere a localização da variável de cor do programa GLSL
+    // Implementation of draw
     GLint loc_color = glGetUniformLocation(program, "color");
+    glUniform4f(loc_color, 1.0, 0.0, 0.0, 1.0); // ### vermelho
 
-    // Desenhe a esfera usando triângulos (GL_TRIANGLES)
-    for (int i = 0; i < this->getVerticesSize(); i += 3){
-        //gera cor aleatoria
-        float r = (float)rand() / (float)RAND_MAX;
-        float g = (float)rand() / (float)RAND_MAX;
-        float b = (float)rand() / (float)RAND_MAX;
-
-        glUniform4f(loc_color, r, g, b, 1.0);
-        glDrawArrays(GL_TRIANGLES, i, 3);
-    }
+    // Desenhe a base
+    glDrawArrays(GL_TRIANGLE_FAN, 0, this->numSegments + 1);
+    glDrawArrays(GL_TRIANGLE_FAN, this->numSegments + 1, this->numSegments + 1);
+    glDrawArrays(GL_TRIANGLE_STRIP, 2 * (this->numSegments + 1), this->numSegments * 2 * 3);
 }
