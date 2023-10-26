@@ -34,7 +34,13 @@ int main(void)
     engine.addObject(pyramid);
 */
     // cria um cilindro
-    CGcylinder cylinder = CGcylinder({0, 0, 0}, .2f, .4f, 12, "Cylinder");
+    CGcylinder cylinder = CGcylinder({0, 0, 0}, .5f, .8f, "Cylinder");
+
+    cylinder.setConstantMotion([&]() {
+        (*cylinder.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
+        (*cylinder.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);
+        (*cylinder.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
+    });
 
     engine.addObject(cylinder);
 

@@ -2,6 +2,7 @@
 #define CGSHAPES3D_H
 
 #include "CGobject3D.h"
+#define numSegments 360
 
 class CGcube : public CGObject3D
 {
@@ -102,19 +103,34 @@ class CGcylinder : public CGObject3D
     using CGObject3D::CGObject3D;
 
 public:
-    CGcylinder(Vec3 origin, float radius, float height, int numSegments, const char* name) : CGObject3D((numSegments + 1) * 2, numSegments * 6, name)
+    CGcylinder(Vec3 origin, float radius, float height, const char* name) : CGObject3D(2*numSegments + 2, numSegments * 8 + 2, name)
     {
         float theta;
-        for (int i = 0; i < numSegments; i++){
-            theta = 2 * M_PI * (i/numSegments);
-            Vec3 verticeUp = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z + height/2};
-            Vec3 verticeDown = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z - height/2};
-            pushVertex (verticeUp);
-            pushVertex (verticeDown);
+        Vec3 vertices[(2*numSegments)+2];
+
+        Vec3 originUpper = origin;
+        originUpper.z += height/2;
+        vertices[0] = originUpper;
+        
+        Vec3 originDown = origin;
+        originDown.z -= height/2;
+        vertices[numSegments+1] = originDown;
+
+        for (int i = 1; i <= numSegments; i++)
+        {
+            theta = 2 * M_PI * (i / float(numSegments));
+
+            vertices[i] = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z + height/2};
+            vertices[i + numSegments + 1] = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z - height/2};
+        }
+
+        for (int i = 0; i < (2*numSegments + 2); i++)
+        {
+            pushVertex(vertices[i]);
+            // std::cout << i << " (" << vertices[i].x << "; " << vertices[i].y << "; " << vertices[i].z << ")" << std::endl;
         }
 
         this->name = name;
-        this->numSegments = numSegments;
     }
 
     ~CGcylinder();
@@ -122,9 +138,6 @@ public:
     Vec3* getVerticesMatrix() override;
     void draw(GLuint program);
 
-private:
-    int numSegments;
-    void createCylinderGeometry(float radius, float height, int numSegments);
 };
 
 #endif
