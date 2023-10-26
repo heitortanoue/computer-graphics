@@ -5,8 +5,8 @@
 
 using namespace std;
 
-const float velocity = .01f;
-const float rotationSpeed = .02f;
+const float velocity = .05f;
+const float rotationSpeed = .04f;
 const float scaleSpeed = .02f;
 
 int main(void)
@@ -36,10 +36,48 @@ int main(void)
     // cria um cilindro
     CGcylinder cylinder = CGcylinder({0, 0, 0}, .5f, .8f, "Cylinder");
 
-    cylinder.setConstantMotion([&]() {
-        (*cylinder.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
-        (*cylinder.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);
-        (*cylinder.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
+    cylinder.setKeyEventCallback([&](int key, int scancode, int action, int mods) {
+        // rotation
+        if (key == GLFW_KEY_UP){
+            (*cylinder.getTransformationMatrix()).rotate('x', rotationSpeed);
+        }
+        if (key == GLFW_KEY_DOWN){
+            (*cylinder.getTransformationMatrix()).rotate('x', -rotationSpeed);
+        }
+        if (key == GLFW_KEY_RIGHT){
+            (*cylinder.getTransformationMatrix()).rotate('y', rotationSpeed);
+        }
+        if (key == GLFW_KEY_LEFT){
+            (*cylinder.getTransformationMatrix()).rotate('y', -rotationSpeed);
+        }
+        if (key == GLFW_KEY_M){
+            (*cylinder.getTransformationMatrix()).rotate('z', rotationSpeed);
+        }
+        if (key == GLFW_KEY_N){
+            (*cylinder.getTransformationMatrix()).rotate('z', -rotationSpeed);
+        }
+
+        // movement
+        if (key == GLFW_KEY_W){
+            (*cylinder.getTransformationMatrix()).translate(Vec3(0, velocity, 0));
+        }
+        if (key == GLFW_KEY_S){
+            (*cylinder.getTransformationMatrix()).translate(Vec3(0, -velocity, 0));
+        }
+        if (key == GLFW_KEY_D){
+            (*cylinder.getTransformationMatrix()).translate(Vec3(velocity, 0, 0));
+        }
+        if (key == GLFW_KEY_A){
+            (*cylinder.getTransformationMatrix()).translate(Vec3(-velocity, 0, 0));
+        }
+        
+        // scale
+        if (key == GLFW_KEY_Z){
+            (*cylinder.getTransformationMatrix()).scaleTransform3D(-scaleSpeed);
+        }
+        if (key == GLFW_KEY_X){
+            (*cylinder.getTransformationMatrix()).scaleTransform3D(scaleSpeed);
+        }
     });
 
     engine.addObject(cylinder);
