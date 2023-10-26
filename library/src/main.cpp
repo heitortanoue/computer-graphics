@@ -11,33 +11,13 @@ const float scaleSpeed = .02f;
 
 int main(void)
 {
-    CGengine engine;
+    CGengine engine; // cria a engine
 
-/*    CGcube cube = CGcube({-.1f, -.1f, 0}, .1f, "Cubo");
-
-    cube.setConstantMotion([&]() {
-        (*cube.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
-        (*cube.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);
-        (*cube.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
-    });
-
-    engine.addObject(cube);
-
-    CGpyramid pyramid = CGpyramid({.4f,.4f,0}, .2f, .3f, "Pyramid");
-
-    pyramid.setConstantMotion([&]() {
-        (*pyramid.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
-        (*pyramid.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);
-        (*pyramid.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
-    });
-
-    engine.addObject(pyramid);
-*/
     // cria um cilindro
     CGcylinder cylinder = CGcylinder({0, 0, 0}, .5f, .8f, "Cylinder");
 
     cylinder.setKeyEventCallback([&](int key, int scancode, int action, int mods) {
-        // rotation
+        // rotação
         if (key == GLFW_KEY_UP){
             (*cylinder.getTransformationMatrix()).rotate('x', rotationSpeed);
         }
@@ -57,7 +37,7 @@ int main(void)
             (*cylinder.getTransformationMatrix()).rotate('z', -rotationSpeed);
         }
 
-        // movement
+        // movimento
         if (key == GLFW_KEY_W){
             (*cylinder.getTransformationMatrix()).translate(Vec3(0, velocity, 0));
         }
@@ -71,12 +51,17 @@ int main(void)
             (*cylinder.getTransformationMatrix()).translate(Vec3(-velocity, 0, 0));
         }
         
-        // scale
+        // escala
         if (key == GLFW_KEY_Z){
             (*cylinder.getTransformationMatrix()).scaleTransform3D(-scaleSpeed);
         }
         if (key == GLFW_KEY_X){
             (*cylinder.getTransformationMatrix()).scaleTransform3D(scaleSpeed);
+        }
+
+        // encerra o programa
+        if (key == GLFW_KEY_ESCAPE){
+            exit(EXIT_SUCCESS);
         }
     });
 
