@@ -105,29 +105,28 @@ class CGcylinder : public CGObject3D
 public:
     CGcylinder(Vec3 origin, float radius, float height, const char* name) : CGObject3D(2*numSegments + 2, numSegments * 8 + 2, name)
     {
-        float theta;
-        Vec3 vertices[(2*numSegments)+2];
+        float theta; // angulo de cada triângulo
+        Vec3 vertices[(2*numSegments)+2]; // todos os vértices que compõem o cilindro (circulo de cima + debaixo + centro de cima + debaixo)
 
         Vec3 originUpper = origin;
         originUpper.z += height/2;
-        vertices[0] = originUpper;
+        vertices[0] = originUpper; // centro superior do cilindro
         
         Vec3 originDown = origin;
         originDown.z -= height/2;
-        vertices[numSegments+1] = originDown;
+        vertices[numSegments+1] = originDown; // centro inferior do cilindro
 
         for (int i = 1; i <= numSegments; i++)
         {
-            theta = 2 * M_PI * (i / float(numSegments));
+            theta = 2 * M_PI * (i / float(numSegments)); // angulo do vértice
 
-            vertices[i] = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z + height/2};
-            vertices[i + numSegments + 1] = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z - height/2};
+            vertices[i] = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z + height/2}; // vértice superior
+            vertices[i + numSegments + 1] = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z - height/2}; // vértice inferior
         }
 
         for (int i = 0; i < (2*numSegments + 2); i++)
         {
-            pushVertex(vertices[i]);
-            // std::cout << i << " (" << vertices[i].x << "; " << vertices[i].y << "; " << vertices[i].z << ")" << std::endl;
+            pushVertex(vertices[i]); // adiciona os vértices ao vetor de vértices
         }
 
         this->name = name;

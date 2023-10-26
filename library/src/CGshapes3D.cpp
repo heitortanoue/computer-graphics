@@ -113,50 +113,51 @@ Vec3 *CGcylinder::getVerticesMatrix()
     int faceIndices[this->getVerticesSize()];
     int i = 0;
 
+    // cria os indices da face superior
     for (; i < numSegments; i++)
     {
-        faceIndices[3*i] = 0; // origem de cima
+        faceIndices[3*i] = 0; // centro do círculo de cima
         faceIndices[3*i + 1] = i + 1;
+
+        // o último vértice faz um triângulo com o primeiro
         if (i == numSegments - 1){
             faceIndices[3*i + 2] = 1;
             continue;
         }
-        else{
-            faceIndices[3*i + 2] = i + 2;
-        }
+        faceIndices[3*i + 2] = i + 2;
     }
 
+    // cria os indices da face inferior
     for (; i < (2 * numSegments); i++)
     {
-        faceIndices[3*i] = numSegments + 1; //origem de baixo
+        faceIndices[3*i] = numSegments + 1; // centro do círculo debaixo
         faceIndices[3*i + 1] = i + 2;
+
+        // o último vértice faz um triângulo com o primeiro
         if (i == ((2 * numSegments) - 1)){
             faceIndices[3*i + 2] = numSegments + 2;
             continue;
         }
-        else{
-            faceIndices[3*i + 2] = i + 3;
-        }
+        faceIndices[3*i + 2] = i + 3;
     }
     
-    i = 3*i;
-    for (int j = 1; j < numSegments + 1; j++, i=i+2)
+    i *= 3;
+    // cria os indices da lateral
+    for (int j = 1; j < numSegments + 1; j++, i+=2)
     {
         faceIndices[i] = j;
         faceIndices[i + 1] = j + numSegments + 1;
-        std::cout << faceIndices[i] << " " << faceIndices[i+1] << " ";
     }
-
     faceIndices[i] = 1;
-    faceIndices[i+1] = numSegments + 2;
+    faceIndices[i+1] = numSegments + 2; // fecha a lateral do cilindro
     
     Vec3 *verticesMatrix = new Vec3[this->getVerticesSize()];
     auto vertices = getVertices();
 
+    // define a matriz de vertices
     for (int i = 0; i < this->getVerticesSize(); i++)
     {
         verticesMatrix[i] = vertices[faceIndices[i]];
-        std::cout << i << " (" << verticesMatrix[i].x << "; " << verticesMatrix[i].y << "; " << verticesMatrix[i].z << ")" << std::endl;
     }
 
     return verticesMatrix;
@@ -164,28 +165,22 @@ Vec3 *CGcylinder::getVerticesMatrix()
 
 void CGcylinder::draw(GLuint program)
 {
-    // Implementation of draw
     GLint loc_color = glGetUniformLocation(program, "color");
-    glUniform4f(loc_color, 1.0, 0.0, 0.0, 1.0); // ### vermelho
 
     // Desenhe a base cima
     for (int i = 0; i < numSegments; i++)
     {
+        glUniform4f(loc_color, 0.0, 0.7, 0.9, 1.0); // azul
         glDrawArrays(GL_TRIANGLES, i * 3, 3);
     }
 
-    glUniform4f(loc_color, 0.0, 0.0, 1.0, 1.0); // ### azul
-
     // Desenhe a base baixo
-    for (int i = 0; i < numSegments; i++){
+    for (int i = 0; i < numSegments; i++)
+    {
+        glUniform4f(loc_color, 0.95, 0.4, 0.6, 1.0); // rosa
         glDrawArrays(GL_TRIANGLES, (numSegments + i) * 3, 3);
     }
 
-    glUniform4f(loc_color, 0.0, 1.0, 0.0, 1.0); // ### verde
-
-    // Desenhe a lateral
-    // for (int i = 0; i < (2 * numSegments); i++)
-    // {
-        glDrawArrays(GL_TRIANGLE_STRIP, (6 * numSegments), (2 * numSegments + 2));
-    //}
+    glUniform4f(loc_color, 0.3, 0.0, 0.8, 1.0); // roxo azulado
+    glDrawArrays(GL_TRIANGLE_STRIP, (6 * numSegments), (2 * numSegments + 2));
 }

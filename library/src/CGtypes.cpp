@@ -11,6 +11,15 @@ void TransformationMatrix::translate(Vec2 tl)
     updateMatrix();
 }
 
+void TransformationMatrix::translate(Vec3 tl)
+{
+    translation.x += tl.x;
+    translation.y += tl.y;
+    translation.z += tl.z;
+    updateMatrix();
+}
+
+
 void TransformationMatrix::rotate(float angle)
 {
     rotation.z += angle;
