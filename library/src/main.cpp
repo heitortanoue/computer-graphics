@@ -13,7 +13,7 @@ int main(void)
 {
     CGengine engine;
 
-    CGcube cube = CGcube({-.1f, -.1f, 0}, .1f, "Cubo");
+/*    CGcube cube = CGcube({-.1f, -.1f, 0}, .1f, "Cubo");
 
     cube.setConstantMotion([&]() {
         (*cube.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
@@ -22,7 +22,7 @@ int main(void)
     });
 
     engine.addObject(cube);
-/*
+
     CGpyramid pyramid = CGpyramid({.4f,.4f,0}, .2f, .3f, "Pyramid");
 
     pyramid.setConstantMotion([&]() {
@@ -31,17 +31,18 @@ int main(void)
         (*pyramid.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
     });
 
-    engine.addObject(pyramid);*/
+    engine.addObject(pyramid);
+*/
+    // cria um cilindro
+    CGcylinder cylinder = CGcylinder({0, 0, 0}, .5f, .8f, "Cylinder");
 
-    // cria a esfera
-    CGsphere sphere = CGsphere({0,0,0}, .2f, "Esfera");
-
-    sphere.setConstantMotion([&]() {
-        (*sphere.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
-        (*sphere.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);
-        (*sphere.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
+    cylinder.setConstantMotion([&]() {
+        (*cylinder.getTransformationMatrix()).rotate('x', rotationSpeed * .3f);
+        (*cylinder.getTransformationMatrix()).rotate('y', rotationSpeed * .4f);
+        (*cylinder.getTransformationMatrix()).rotate('z', rotationSpeed * .5f);
     });
-    engine.addObject(sphere);
+
+    engine.addObject(cylinder);
 
     engine.run();
 

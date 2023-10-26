@@ -2,7 +2,7 @@ from src.functions import *
 import glm
 
 class Model:
-    def __init__(self, path):
+    def __init__(self, path, initial_position):
         self.model = load_model_from_file(create_model_path(path, 'obj'))
         self.mat_transform = glm.mat4(1)
         self.buffer = None
@@ -12,7 +12,8 @@ class Model:
 
         self.scale = .1
         self.rotation = glm.vec3(0,0,0)
-        self.translation = glm.vec3(0,0,0)
+        self.translation = initial_position
+        self.mat_transform = glm.translate(self.mat_transform, self.translation)
 
     def applyTransformations(self, scale, rotation, translation):
         self.scale = scale

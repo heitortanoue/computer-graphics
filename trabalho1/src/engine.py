@@ -42,6 +42,9 @@ fragment_code = """
         """
 
 class Engine:
+    boundaries = glm.vec4(0,0,0,0)
+    position = glm.vec3(0,0,0)
+    
     def __init__(self):
         if not glfw.init():
             raise Exception("Failed to initialize GLFW")
@@ -73,19 +76,23 @@ class Engine:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             glClearColor(1.0, 1.0, 1.0, 1.0)
 
+            # seleciona o objeto a ser desenhado
             model = self.objects[self.objectOnFocus]
+            if self.objectOnFocus == 0:
+                self.boundaries = glm.vec4(0.89,-0.89,0.15,-0.89)
+            elif self.objectOnFocus == 1:
+                self.boundaries = glm.vec4(0.57,-0.67,-0.35,-0.98)
 
+            # muda o buffer para o do objeto selecionado
             self.switchBuffers(model)
 
-            model.mat_transform = glm.mat4(1)
-
-            avgPos = getAveragePosition(model.model)
-            angle = glfw.get_time() * math.pi / 10
-
-            model.applyTransformations(model.scale, glm.vec3(0, angle, 0), avgPos * -model.scale)
+            model.applyTransformations(model.scale, model.rotation, model.translation)
 
             loc_mat_transform = glGetUniformLocation(self.program, "mat_transform")
             glUniformMatrix4fv(loc_mat_transform, 1, GL_FALSE, glm.value_ptr(model.mat_transform))
+            print(model.mat_transform)
+            print(model.translation)
+            print(self.boundaries)
 
             self.drawModels(model)
 
@@ -153,6 +160,7 @@ class Engine:
 
     def showWindow(self):
         self.polygonal_mode = False
+        self.texture_filter = False
         glfw.show_window(self.window)
         glfw.set_key_callback(self.window, key_event_static)
         glEnable(GL_DEPTH_TEST) ### importante para 3D
@@ -175,8 +183,13 @@ class Engine:
     def loadModel(self, model):
         print('Loading Model `' + model + '` ...')
 
+        if model == "capsule":
+            self.position = glm.vec3(0,-0.37,0)
+        elif model == "monstro":
+            self.position = glm.vec3(-0.05,-0.65,0)
+
         modelIndex = len(self.objects)
-        modelo = Model(model)
+        modelo = Model(model, self.position)
 
         # Request a buffer slot from GPU
         modelo.buffer = glGenBuffers(2)
@@ -236,6 +249,15 @@ class Engine:
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
             else:
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        
+        if key == glfw.KEY_V and action == glfw.PRESS:
+            self.texture_filter = not self.texture_filter
+            if self.texture_filter:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+            else:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
 
         if key >= glfw.KEY_1 and key <= glfw.KEY_5 and action == glfw.PRESS:
             self.objectOnFocus = key - glfw.KEY_1
@@ -244,7 +266,41 @@ class Engine:
         modelOnFocus = self.objects[self.objectOnFocus]
 
         if key == glfw.KEY_Z and action == glfw.PRESS:
-            modelOnFocus.scale *= (1 + .2)
+            print(modelOnFocus.scale)
+            if modelOnFocus.scale < 1:
+                modelOnFocus.scale *= (1 + .2)
 
         if key == glfw.KEY_X and action == glfw.PRESS:
+            print(modelOnFocus.scale)
             modelOnFocus.scale *= (1 - 0.2)
+
+        if key == glfw.KEY_W and modelOnFocus.translation[1] < self.boundaries[2]:
+            modelOnFocus.translation.y += 0.01
+        
+        if key == glfw.KEY_S and modelOnFocus.translation[1] > self.boundaries[3]:
+            modelOnFocus.translation.y -= 0.01
+        
+        if key == glfw.KEY_A and modelOnFocus.translation[0] > self.boundaries[1]:
+            modelOnFocus.translation.x -= 0.01
+
+        if key == glfw.KEY_D and modelOnFocus.translation[0] < self.boundaries[0]:
+            modelOnFocus.translation.x += 0.01
+
+        # rotation using the arrow keys
+        if key == glfw.KEY_UP:
+            modelOnFocus.rotation.x += 0.1 * math.pi / 10
+
+        if key == glfw.KEY_DOWN:
+            modelOnFocus.rotation.x -= 0.1 * math.pi / 10
+
+        if key == glfw.KEY_LEFT:
+            modelOnFocus.rotation.y += 0.1 * math.pi / 10
+        
+        if key == glfw.KEY_RIGHT:
+            modelOnFocus.rotation.y -= 0.1 * math.pi / 10
+
+        if key == glfw.KEY_M:
+            modelOnFocus.rotation.z += 0.1 * math.pi / 10
+        
+        if key == glfw.KEY_N:
+            modelOnFocus.rotation.z -= 0.1 * math.pi / 10

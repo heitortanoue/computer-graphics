@@ -2,6 +2,7 @@
 #define CGSHAPES3D_H
 
 #include "CGobject3D.h"
+#define numSegments 360
 
 class CGcube : public CGObject3D
 {
@@ -95,50 +96,48 @@ public:
     void draw(GLuint program);
 };
 
-// SPHERE
-class CGsphere : public CGObject3D
+// CYLINDER
+
+class CGcylinder : public CGObject3D
 {
     using CGObject3D::CGObject3D;
 
 public:
-    CGsphere() : CGObject3D(0, (int)pow(divisions, 2)) {}
-
-    CGsphere(Vec3 center, float radius, const char *name) : CGObject3D(0, (int)pow(divisions, 2), name)
+    CGcylinder(Vec3 origin, float radius, float height, const char* name) : CGObject3D(2*numSegments + 2, numSegments * 8 + 2, name)
     {
-        generateSphere(center, radius);
+        float theta;
+        Vec3 vertices[(2*numSegments)+2];
+
+        Vec3 originUpper = origin;
+        originUpper.z += height/2;
+        vertices[0] = originUpper;
+        
+        Vec3 originDown = origin;
+        originDown.z -= height/2;
+        vertices[numSegments+1] = originDown;
+
+        for (int i = 1; i <= numSegments; i++)
+        {
+            theta = 2 * M_PI * (i / float(numSegments));
+
+            vertices[i] = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z + height/2};
+            vertices[i + numSegments + 1] = {origin.x + radius * cos(theta), origin.y + radius * sin(theta), origin.z - height/2};
+        }
+
+        for (int i = 0; i < (2*numSegments + 2); i++)
+        {
+            pushVertex(vertices[i]);
+            // std::cout << i << " (" << vertices[i].x << "; " << vertices[i].y << "; " << vertices[i].z << ")" << std::endl;
+        }
+
         this->name = name;
     }
 
-    ~CGsphere();
+    ~CGcylinder();
 
     Vec3* getVerticesMatrix() override;
     void draw(GLuint program);
 
-private:
-    void generateSphere(Vec3 center, float radius)
-    {
-        // Define o número de divisões da esfera para obter uma representação mais suave
-        int qnt = 0;
-        for (int i = 0; i < divisions; ++i)
-        {
-            float theta = i * M_PI / divisions; // Ângulo polar
-            for (int j = 0; j <= divisions; ++j)
-            {
-                float phi = j * 2 * M_PI / divisions; // Ângulo azimutal
-
-                // Calcula as coordenadas dos vértices da esfera
-                float x = radius * sin(theta) * cos(phi) + center.x;
-                float y = radius * sin(theta) * sin(phi) + center.y;
-                float z = radius * cos(theta) + center.z;
-
-                qnt++;
-                std::cout << qnt << " " << x << " " << y << " " << z << std::endl;
-                pushVertex({x, y, z});
-            }
-        }
-    }
-
-    const int divisions = 20;
 };
 
 #endif

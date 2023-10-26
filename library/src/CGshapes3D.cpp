@@ -1,4 +1,5 @@
 #include "CGshapes3D.h"
+#include <cmath>
 
 CGcube::~CGcube()
 {
@@ -100,33 +101,91 @@ void CGpyramid::draw(GLuint program)
     glDrawArrays(GL_TRIANGLE_STRIP, 12, 4);          // Desenhe a face superior
 }
 
-
 // ====================================
-// SPHERE
+// CYLINDER
 
-CGsphere::~CGsphere()
+CGcylinder::~CGcylinder()
 {
 }
 
-Vec3 *CGsphere::getVerticesMatrix()
+Vec3 *CGcylinder::getVerticesMatrix()
 {
-    auto vertices = getVertices();
-    return vertices.data();
-}
+    int faceIndices[this->getVerticesSize()];
+    int i = 0;
 
-void CGsphere::draw(GLuint program)
-{
-    // Recupere a localização da variável de cor do programa GLSL
-    GLint loc_color = glGetUniformLocation(program, "color");
-
-    // Desenhe a esfera usando triângulos (GL_TRIANGLES)
-    for (int i = 0; i < this->getVerticesSize(); i += 3){
-        //gera cor aleatoria
-        float r = (float)rand() / (float)RAND_MAX;
-        float g = (float)rand() / (float)RAND_MAX;
-        float b = (float)rand() / (float)RAND_MAX;
-
-        glUniform4f(loc_color, r, g, b, 1.0);
-        glDrawArrays(GL_TRIANGLES, i, 3);
+    for (; i < numSegments; i++)
+    {
+        faceIndices[3*i] = 0; // origem de cima
+        faceIndices[3*i + 1] = i + 1;
+        if (i == numSegments - 1){
+            faceIndices[3*i + 2] = 1;
+            continue;
+        }
+        else{
+            faceIndices[3*i + 2] = i + 2;
+        }
     }
+
+    for (; i < (2 * numSegments); i++)
+    {
+        faceIndices[3*i] = numSegments + 1; //origem de baixo
+        faceIndices[3*i + 1] = i + 2;
+        if (i == ((2 * numSegments) - 1)){
+            faceIndices[3*i + 2] = numSegments + 2;
+            continue;
+        }
+        else{
+            faceIndices[3*i + 2] = i + 3;
+        }
+    }
+    
+    i = 3*i;
+    for (int j = 1; j < numSegments + 1; j++, i=i+2)
+    {
+        faceIndices[i] = j;
+        faceIndices[i + 1] = j + numSegments + 1;
+        std::cout << faceIndices[i] << " " << faceIndices[i+1] << " ";
+    }
+
+    faceIndices[i] = 1;
+    faceIndices[i+1] = numSegments + 2;
+    
+    Vec3 *verticesMatrix = new Vec3[this->getVerticesSize()];
+    auto vertices = getVertices();
+
+    for (int i = 0; i < this->getVerticesSize(); i++)
+    {
+        verticesMatrix[i] = vertices[faceIndices[i]];
+        std::cout << i << " (" << verticesMatrix[i].x << "; " << verticesMatrix[i].y << "; " << verticesMatrix[i].z << ")" << std::endl;
+    }
+
+    return verticesMatrix;
+}
+
+void CGcylinder::draw(GLuint program)
+{
+    // Implementation of draw
+    GLint loc_color = glGetUniformLocation(program, "color");
+    glUniform4f(loc_color, 1.0, 0.0, 0.0, 1.0); // ### vermelho
+
+    // Desenhe a base cima
+    for (int i = 0; i < numSegments; i++)
+    {
+        glDrawArrays(GL_TRIANGLES, i * 3, 3);
+    }
+
+    glUniform4f(loc_color, 0.0, 0.0, 1.0, 1.0); // ### azul
+
+    // Desenhe a base baixo
+    for (int i = 0; i < numSegments; i++){
+        glDrawArrays(GL_TRIANGLES, (numSegments + i) * 3, 3);
+    }
+
+    glUniform4f(loc_color, 0.0, 1.0, 0.0, 1.0); // ### verde
+
+    // Desenhe a lateral
+    // for (int i = 0; i < (2 * numSegments); i++)
+    // {
+        glDrawArrays(GL_TRIANGLE_STRIP, (6 * numSegments), (2 * numSegments + 2));
+    //}
 }
