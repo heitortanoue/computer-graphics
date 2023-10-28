@@ -2,11 +2,13 @@ import os
 import glm
 import math
 
-def getAveragePosition(modelo):
+def getModelProportions(modelo):
     x_max = -math.inf
     x_min = math.inf
     y_max = -math.inf
     y_min = math.inf
+    z_max = -math.inf
+    z_min = math.inf
 
     for obj in modelo.model['vertices']:
         # obj str to float
@@ -24,19 +26,34 @@ def getAveragePosition(modelo):
         elif obj[1] > y_max:
             y_max = obj[1]
 
+        if obj[2] < z_min:
+            z_min = obj[2]
+        elif obj[2] > z_max:
+            z_max = obj[2]
+
     x_med = (x_max + x_min)/2
     y_med = (y_max + y_min)/2
 
     modelo.bounds = {
-        'x_max': x_med,
-        'x_min': -x_med,
-        'y_max': y_med,
-        'y_min': -y_med
+        'x_max': x_max,
+        'x_min': x_min,
+        'y_max': y_max,
+        'y_min': y_min,
+        'z_max': z_max,
+        'z_min': z_min
     }
 
     averageVector = glm.vec3(x_med, y_med, 0)
+    width = x_max - x_min
+    height = y_max - y_min
+    depth = z_max - z_min
 
-    return averageVector
+    return {
+        "center": averageVector,
+        "height": height,
+        "width": width,
+        "depth": depth
+    }
 
 def create_model_path(model, extension):
     # Get the current directory of the script

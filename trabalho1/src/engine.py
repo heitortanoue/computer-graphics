@@ -230,10 +230,6 @@ class Engine:
         glDrawArrays(GL_TRIANGLES, 0, len(model.vertices))
 
     def keyEvent(self, window, key, scancode, action, mods):
-        rotationSpeed = 0.1 * math.pi / 10
-        translationSpeed = 0.2
-        scaleSpeed = 0.05
-
         if key == glfw.KEY_P and action == glfw.PRESS:
             self.polygonal_mode = not self.polygonal_mode
             if self.polygonal_mode:
@@ -245,9 +241,11 @@ class Engine:
         if key == glfw.KEY_V and action == glfw.PRESS:
             self.texture_filter = not self.texture_filter
             if self.texture_filter:
+                print("Texture filter: GL_NEAREST")
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
             else:
+                print("Texture filter: GL_LINEAR")
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
             return
@@ -259,52 +257,56 @@ class Engine:
 
 
         modelOnFocus = self.objects[self.objectOnFocus]
+        rotationSpeed = 0.2 * math.pi / 10
+        translationSpeed = .1 * abs(math.exp(modelOnFocus.scale))
+        print(translationSpeed)
+        scaleSpeed = 0.1
 
         if key == glfw.KEY_Z and action == glfw.PRESS:
-            modelOnFocus.scaleInc = (1 + scaleSpeed)
+            modelOnFocus.scale *= (1 + scaleSpeed)
             return
 
         if key == glfw.KEY_X and action == glfw.PRESS:
-            modelOnFocus.scaleInc = (1 - scaleSpeed)
+            modelOnFocus.scale *= (1 - scaleSpeed)
             return
 
         if key == glfw.KEY_W and action == glfw.PRESS:
-            modelOnFocus.translationInc.y = +translationSpeed * modelOnFocus.scale
+            modelOnFocus.translation.y += +translationSpeed
             return
 
         if key == glfw.KEY_S and action == glfw.PRESS:
-            modelOnFocus.translationInc.y = -translationSpeed * modelOnFocus.scale
+            modelOnFocus.translation.y += -translationSpeed
             return
 
         if key == glfw.KEY_A and action == glfw.PRESS:
-            modelOnFocus.translationInc.x = -translationSpeed * modelOnFocus.scale
+            modelOnFocus.translation.x += -translationSpeed
             return
 
         if key == glfw.KEY_D and action == glfw.PRESS:
-            modelOnFocus.translationInc.x = +translationSpeed * modelOnFocus.scale
+            modelOnFocus.translation.x += +translationSpeed
             return
 
         # rotation using the arrow keys
         if key == glfw.KEY_UP:
-            modelOnFocus.rotationInc.x = +rotationSpeed
+            modelOnFocus.rotation.x += +rotationSpeed
             return
 
         if key == glfw.KEY_DOWN:
-            modelOnFocus.rotationInc.x = -rotationSpeed
+            modelOnFocus.rotation.x += -rotationSpeed
             return
 
         if key == glfw.KEY_LEFT:
-            modelOnFocus.rotationInc.y = +rotationSpeed
+            modelOnFocus.rotation.y += +rotationSpeed
             return
 
         if key == glfw.KEY_RIGHT:
-            modelOnFocus.rotationInc.y = -rotationSpeed
+            modelOnFocus.rotation.y += -rotationSpeed
             return
 
         if key == glfw.KEY_M:
-            modelOnFocus.rotationInc.z = +rotationSpeed
+            modelOnFocus.rotation.z += +rotationSpeed
             return
 
         if key == glfw.KEY_N:
-            modelOnFocus.rotationInc.z = -rotationSpeed
+            modelOnFocus.rotation.z += -rotationSpeed
             return

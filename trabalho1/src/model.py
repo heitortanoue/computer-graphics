@@ -11,49 +11,71 @@ class Model:
         self.texture_coords = []
         self.bounds = {}
 
+        proportions = getModelProportions(self)
+        self.center = proportions['center']
+        self.width = proportions['width']
+        self.height = proportions['height']
+        self.depth = proportions['depth']
 
         self.scale = .15
         self.rotation = glm.vec3(0,0,0)
         self.translation = glm.vec3(0,0,0)
 
-        self.mat_transform = glm.scale(self.mat_transform, glm.vec3(self.scale, self.scale, self.scale))
-        self.mat_transform = glm.translate( self.mat_transform, -getAveragePosition(self) )
-
-
-        self.scaleInc = 1
-        self.rotationInc = glm.vec3(0,0,0)
-        self.translationInc = glm.vec3(0,0,0)
-
     def applyTransformations(self):
         newMat = glm.mat4(1)
-        newMat = glm.translate(newMat, self.translationInc)
-        newMat = glm.rotate(newMat, self.rotationInc.x, glm.vec3(1, 0, 0))
-        newMat = glm.rotate(newMat, self.rotationInc.y, glm.vec3(0, 1, 0))
-        newMat = glm.rotate(newMat, self.rotationInc.z, glm.vec3(0, 0, 1))
-        newMat = glm.scale(newMat, glm.vec3(self.scaleInc, self.scaleInc, self.scaleInc))
+
+        newMat = glm.translate(newMat, -self.center * self.scale)
+        newMat = glm.translate(newMat, self.translation)
+        newMat = glm.scale(newMat, glm.vec3(self.scale, self.scale, self.scale))
+
+        newMat = glm.rotate(newMat, self.rotation.x, glm.vec3(1, 0, 0))
+        newMat = glm.rotate(newMat, self.rotation.y, glm.vec3(0, 1, 0))
+        newMat = glm.rotate(newMat, self.rotation.z, glm.vec3(0, 0, 1))
 
         if not self.violateBounds():
-            self.mat_transform = newMat * self.mat_transform
+            self.mat_transform = newMat
+            return
 
-            self.scale *= self.scaleInc
-            self.rotation += self.rotationInc
-            self.translation += self.translationInc
-
-        self.translationInc = glm.vec3(0,0,0)
-        self.rotationInc = glm.vec3(0,0,0)
-        self.scaleInc = 1
-
-        # print(self.mat_transform)
 
     def violateBounds(self):
-        rightPos = (self.bounds['x_max'] * self.scale) + self.translation.x
-        leftPos = (self.bounds['x_min'] * self.scale) + self.translation.x
-        topPos = (self.bounds['y_max'] * self.scale) + self.translation.y
-        bottomPos = (self.bounds['y_min'] * self.scale) + self.translation.y
+        scaled_width = self.width * self.scale
+        scaled_height = self.height * self.scale
+        scaled_depth = self.depth * self.scale
 
-        print("bounds: ", leftPos, rightPos, topPos, bottomPos)
+        maxScale = max(scaled_width, scaled_height, scaled_depth)
 
-        if rightPos > 1 or leftPos < -1 or topPos > 1 or bottomPos < -1:
-            return True
-        else:
+        leftPos = self.translation.x - scaled_width/2
+        rightPos = self.translation.x + scaled_width/2
+        topPos = self.translation.y + scaled_height/2
+        bottomPos = self.translation.y - scaled_height/2
+
+        remainderTranslation = glm.vec3(0,0,0)
+
+        # saiu da tela pelos lados
+        if rightPos >= 1:
+            remainderTranslation.x = 1 - rightPos
+        elif leftPos <= -1:
+            remainderTranslation.x = -1 - leftPos
+
+        # saiu da tela por cima ou por baixo
+        if topPos >= 1:
+            remainderTranslation.y = 1 - topPos
+        elif bottomPos <= -1:
+            remainderTranslation.y = -1 - bottomPos
+
+        # passou da escala máxima
+        if maxScale > 2:
+            remainderTranslation.x = 0
+            remainderTranslation.y = 0
+
+            if maxScale == scaled_width:
+                self.scale = 2/self.width
+            elif maxScale == scaled_height:
+                self.scale = 2/self.height
+            elif maxScale == scaled_depth:
+                self.scale = 2/self.depth
+
+        if remainderTranslation.x == 0 and remainderTranslation.y == 0:
             return False
+
+        self.translation += remainderTranslation
