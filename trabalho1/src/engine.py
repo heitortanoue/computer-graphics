@@ -64,6 +64,9 @@ class Engine:
 
         self.loadModel("capsule")
         self.loadModel("monstro")
+        self.loadModel("cat")
+        self.loadModel("skull")
+        self.loadModel("statue")
 
         self.showWindow()
         print("Engine initialized.")
