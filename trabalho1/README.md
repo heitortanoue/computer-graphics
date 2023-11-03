@@ -4,7 +4,7 @@
 
 Beatriz Cardoso de Oliveira - 12566400
 
-Heitor Tanoue de Mello -
+Heitor Tanoue de Mello - 12547260
 
 Este é um projeto para disciplina SCC0650 - Computação Gráfica que permite carregar e exibir objetos a partir de arquivos no formato wavefront (*.obj) junto com suas respectivas texturas. O projeto é estruturado em três arquivos Python, localizados na pasta "src" e um arquivo `main.py` que executa o código:
 
