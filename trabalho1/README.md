@@ -32,7 +32,13 @@ O projeto atende às seguintes restrições e funcionalidades:
 
 7. A tecla "V" permite alternar entre técnicas de magnificação da aplicação da textura, escolhendo entre LINEAR e NEAREST.
 
-## Dependências 
+8. A tecla "B" permite ativar/desativar a visualização do Bounding Box para o objeto selecionado.
+
+9. A tecla "F" permite alterar entre o modo janela e o modo tela cheia.
+
+10. A tecla "ESC" permite encerrar a execução do programa.
+
+## Dependências
 
 - OpenGL
 
