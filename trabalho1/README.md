@@ -2,9 +2,11 @@
 
 ### Autores
 
-Beatriz Cardoso de Oliveira - 12566400
+👤 Beatriz Cardoso de Oliveira - 12566400
 
-Heitor Tanoue de Mello - 12547260
+👤 Heitor Tanoue de Mello - 12547260
+
+## Descrição
 
 Este é um projeto para disciplina SCC0650 - Computação Gráfica que permite carregar e exibir objetos a partir de arquivos no formato wavefront (*.obj) junto com suas respectivas texturas. O projeto é estruturado em três arquivos Python, localizados na pasta "src" e um arquivo `main.py` que executa o código:
 
@@ -40,7 +42,13 @@ O projeto atende às seguintes restrições e funcionalidades:
 
 ## Dependências
 
-- OpenGL
+Antes de executar o projeto, é necessário instalar todas as bibliotecas e módulos Python necessários. Você pode fazer isso utilizando o arquivo requirements.txt fornecido.
+
+Para instalar as dependências, no terminal, navegue até o diretório onde se encontra o arquivo requirements.txt e execute o seguinte comando:
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Execução
 
