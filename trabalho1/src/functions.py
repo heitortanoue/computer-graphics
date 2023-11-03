@@ -1,6 +1,7 @@
 import os
 import glm
 import math
+from termcolor import colored
 
 def getModelProportions(modelo):
     x_max = -math.inf
@@ -33,6 +34,7 @@ def getModelProportions(modelo):
 
     x_med = (x_max + x_min)/2
     y_med = (y_max + y_min)/2
+    z_med = (z_max + z_min)/2
 
     modelo.bounds = {
         'x_max': x_max,
@@ -43,7 +45,7 @@ def getModelProportions(modelo):
         'z_min': z_min
     }
 
-    averageVector = glm.vec3(x_med, y_med, 0)
+    averageVector = glm.vec3(x_med, y_med, z_med)
     width = x_max - x_min
     height = y_max - y_min
     depth = z_max - z_min
@@ -52,7 +54,7 @@ def getModelProportions(modelo):
         "center": averageVector,
         "height": height,
         "width": width,
-        "depth": depth
+        "depth": depth,
     }
 
 def create_model_path(model, extension):
@@ -64,49 +66,45 @@ def create_model_path(model, extension):
     full_path = os.path.join(parent_directory, "objs", model, model + '.' + extension)
     return full_path
 
-def load_model_from_file(model):
-    """Loads a Wavefront OBJ file. """
+def load_model_from_file(filename):
+    """Loads a Wavefront OBJ file."""
     vertices = []
     texture_coords = []
     faces = []
 
     material = None
 
-    # abre o arquivo obj para leitura
-    for line in open(model, "r"): ## para cada linha do arquivo .obj
-        if line.startswith('#'): continue ## ignora comentarios
-        values = line.split() # quebra a linha por espaço
+    # Open the .obj file for reading
+    for line in open(filename, "r"):
+        if line.startswith('#'): continue  # Ignore comments
+        values = line.split()
         if not values: continue
 
-
-        ### recuperando vertices
         if values[0] == 'v':
-            vertices.append(values[1:4])
-
-
-        ### recuperando coordenadas de textura
+            vertices.append(list(map(float, values[1:4])))
         elif values[0] == 'vt':
-            texture_coords.append(values[1:3])
-
-        ### recuperando faces
+            texture_coords.append(list(map(float, values[1:3])))
         elif values[0] in ('usemtl', 'usemat'):
             material = values[1]
         elif values[0] == 'f':
-            face = []
-            face_texture = []
-            for v in values[1:]:
-                w = v.split('/')
-                face.append(int(w[0]))
-                if len(w) >= 2 and len(w[1]) > 0:
-                    face_texture.append(int(w[1]))
+            # Handle faces with more than 3 vertices (polygon to triangle fan)
+            verts = values[1:]
+            v0 = verts[0]
+            for i in range(1, len(verts) - 1):
+                v1 = verts[i]
+                v2 = verts[i + 1]
+                face = [int(v0.split('/')[0]), int(v1.split('/')[0]), int(v2.split('/')[0])]
+                # Process texture if available
+                if len(v0.split('/')) > 1 and v0.split('/')[1]:
+                    texture = [int(v0.split('/')[1]), int(v1.split('/')[1]), int(v2.split('/')[1])]
                 else:
-                    face_texture.append(0)
+                    texture = [0, 0, 0]  # Default texture indices
+                faces.append((face, texture, material))
 
-            faces.append((face, face_texture, material))
+    return {'vertices': vertices, 'texture': texture_coords, 'faces': faces}
 
-    model = {}
-    model['vertices'] = vertices
-    model['texture'] = texture_coords
-    model['faces'] = faces
-
-    return model
+def printMessage(message, color=None):
+    if color is None:
+        print(message)
+    else:
+        print(colored(message, color))
