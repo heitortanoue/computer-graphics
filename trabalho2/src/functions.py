@@ -108,3 +108,4 @@ def printMessage(message, color=None):
         print(message)
     else:
         print(colored(message, color))
+

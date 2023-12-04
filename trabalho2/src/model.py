@@ -1,6 +1,7 @@
 from src.functions import *
 import glm
 
+min_distance = .05
 class Model:
     def __init__(self, id, path, initial_values=None):
         if initial_values is None:
@@ -11,6 +12,7 @@ class Model:
         self.model = load_model_from_file(create_model_path(path, 'obj'))  # Assuming this is a valid OBJ path
         self.mat_transform = glm.mat4(1)
         self.buffer = None
+        self.haveMoved = True # Começa como True para que o objeto seja renderizado na primeira vez
 
         self.vertices = []
         self.texture_coords = []
@@ -26,8 +28,15 @@ class Model:
         self.scale = initial_values.get("scale", 1)
         self.rotation = glm.vec3(*initial_values.get("rotation", [0, 0, 0]))
         self.translation = glm.vec3(*initial_values.get("translation", [0, 0, 0]))
+        self.applyTransformations() # aplica valores iniciais
+
+        # Set bounding box
+        self.get_bounds()
 
     def applyTransformations(self):
+        if not self.haveMoved:
+            return
+
         newMat = glm.mat4(1)
 
         # Primeiro, translada o objeto para a origem
@@ -44,13 +53,19 @@ class Model:
         # Translada de volta para a posição original
         newMat = glm.translate(newMat, self.center * self.scale)
 
+        self.mat_transform = newMat
+        self.get_bounds()
+        self.haveMoved = False
+
         # Verifica se viola os limites
-        if not self.violateBounds(newMat):
-            self.mat_transform = newMat
-            return
+        # if not self.violateBounds(newMat):
+        #     self.mat_transform = newMat
+        #     return
 
+    def get_bounds(self, mat_transformation=None):
+        if not mat_transformation:
+            mat_transformation = self.mat_transform
 
-    def violateBounds(self, mat_transformation):
         # Define the eight corners of the bounding box based on the unscaled and unrotated object
         bbox_corners = [
             glm.vec3(self.bounds['x_min'], self.bounds['y_min'], self.bounds['z_min']),  # bottom-front-left corner
@@ -74,6 +89,73 @@ class Model:
         max_y = max(corner.y for corner in bounding_box)
         min_z = min(corner.z for corner in bounding_box)
         max_z = max(corner.z for corner in bounding_box)
+
+        return {
+            'min_x': min_x,
+            'max_x': max_x,
+            'min_y': min_y,
+            'max_y': max_y,
+            'min_z': min_z,
+            'max_z': max_z
+        }
+
+    def check_collision(self, objPosition: glm.vec3):
+        # Verifica se o objeto colide com o objeto passado
+        # objPosition é a posição do objeto
+        # Retorna True se houver colisão, False caso contrário
+
+        # Verifica se o objeto está dentro dos limites do modelo usando self.bounding_box
+        # Se estiver, retorna True
+        # Se não estiver, retorna False
+        bounds = self.get_bounds()
+        min_x = bounds['min_x']
+        max_x = bounds['max_x']
+        min_y = bounds['min_y']
+        max_y = bounds['max_y']
+        min_z = bounds['min_z']
+        max_z = bounds['max_z']
+
+        condition_x_with_min_distance = min_x - min_distance <= objPosition.x <= max_x + min_distance
+        condition_y_with_min_distance = min_y - min_distance <= objPosition.y <= max_y + min_distance
+        condition_z_with_min_distance = min_z - min_distance <= objPosition.z <= max_z + min_distance
+
+        if condition_x_with_min_distance and condition_y_with_min_distance and condition_z_with_min_distance:
+            return True
+        return False
+
+    def get_remainder_translation(self, new_position):
+        # Retorna o vetor de translação que falta para o objeto não colidir mais com o modelo
+        # new_position é a nova posição do objeto
+        # Retorna um vetor de translação
+        bounds = self.get_bounds()
+        min_x = bounds['min_x']
+        max_x = bounds['max_x']
+        min_y = bounds['min_y']
+        max_y = bounds['max_y']
+        min_z = bounds['min_z']
+        max_z = bounds['max_z']
+
+        remainder_translation = glm.vec3(0.0, 0.0, 0.0)
+
+        if new_position.x < min_x:
+            remainder_translation.x = min_x - new_position.x - min_distance
+        elif new_position.x > max_x:
+            remainder_translation.x = max_x - new_position.x + min_distance
+
+        if new_position.y < min_y:
+            remainder_translation.y = min_y - new_position.y - min_distance
+        elif new_position.y > max_y:
+            remainder_translation.y = max_y - new_position.y + min_distance
+
+        if new_position.z < min_z:
+            remainder_translation.z = min_z - new_position.z - min_distance
+        elif new_position.z > max_z:
+            remainder_translation.z = max_z - new_position.z + min_distance
+
+        return remainder_translation
+
+    def violateBounds(self, mat_transformation):
+        min_x, max_x, min_y, max_y, min_z, max_z = self.get_bounds(mat_transformation)
 
         # Initialize the remainder translation to zero
         remainder_translation = glm.vec3(0.0, 0.0, 0.0)

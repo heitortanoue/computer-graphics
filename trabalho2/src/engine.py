@@ -99,31 +99,46 @@ class Engine:
         self.buildProgram()
         self.initTextures()
 
-        self.loadModel("skull", {
-            "scale": 0.005,
+        skybox_scale = 20
+        skybox = self.loadModel('skybox', {
+            "scale": skybox_scale,
+        })
+        self.camera.set_boundaries(skybox)
+
+        skull = self.loadModel("skull", {
+            "scale": 0.02,
             "rotation": glm.vec3(-1.57, 0, 0),
             "translation": glm.vec3(2, -0.293, 0.249),
         })
-        self.loadModel("statue", {
-            "scale": 0.004,
-            "rotation": glm.vec3(-1.57, 0, 0),
-            "translation": glm.vec3(-1, -0.63, 0.84),
-        })
-        self.loadModel("cat", {
+        self.camera.add_model_to_check(skull)
+
+        statue = self.loadModel("statue", {
             "scale": 0.005,
             "rotation": glm.vec3(-1.57, 0, 0),
-            "translation": glm.vec3(-2, -0.258, 0.018),
+            "translation": glm.vec3(-0.5, -0.63, 0),
         })
-        self.loadModel("raptor", {
-            "scale": 0.002,
+        self.camera.add_model_to_check(statue)
+
+        cat = self.loadModel("cat", {
+            "scale": 0.006,
+            "rotation": glm.vec3(-1.57, 0, 0),
+            "translation": glm.vec3(-1, -0.258, 0.018),
+        })
+        self.camera.add_model_to_check(cat)
+
+        raptor = self.loadModel("raptor", {
+            "scale": 0.01,
             "rotation": glm.vec3(0, 0, 0),
             "translation": glm.vec3(2, 0, -1),
         })
-        self.loadModel("monster", {
-            "scale": 0.08,
+        self.camera.add_model_to_check(raptor)
+
+        monster = self.loadModel("monster", {
+            "scale": 0.1,
             "rotation": glm.vec3(0, 0, 0),
             "translation": glm.vec3(3, -0.115, 0),
         })
+        self.camera.add_model_to_check(monster)
 
         self.showWindow()
         printMessage("Engine initialized.", "green")
@@ -151,7 +166,7 @@ class Engine:
 
             glfw.swap_buffers(self.window)
 
-    glfw.terminate()
+        glfw.terminate()
 
     def drawAllModels(self):
         for model in self.objects:
@@ -184,7 +199,6 @@ class Engine:
         self.camera.set_width_height(largura, alturaTotal)
 
 
-
     def initWindow(self):
         printMessage('Initializing Window...', 'green')
         glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
@@ -200,7 +214,6 @@ class Engine:
 
         glfw.make_context_current(self.window)
         glfw.set_window_user_pointer(self.window, self)
-
 
 
     def initShaders(self):
@@ -303,6 +316,8 @@ class Engine:
         self.setModelBuffers(modelo)
         self.objects.append(modelo)
 
+        return modelo
+
 
     def setModelBuffers(self, modelo):
         vertices = np.zeros(len(modelo.vertices), [("position", np.float32, 3)])
@@ -393,7 +408,7 @@ class Engine:
             printMessage("Draw bounding box: " + str(self.drawBB), 'blue')
             return
 
-        translationSpeed = 0.2
+        translationSpeed = 0.05
 
         if key == glfw.KEY_W:
             self.camera.move_forward(translationSpeed)

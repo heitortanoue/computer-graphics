@@ -1,0 +1,49 @@
+# Vertex coordinates
+v -0.5 -0.5 -0.5 # 1
+v -0.5 -0.5  0.5 # 2
+v -0.5  0.5 -0.5 # 3
+v -0.5  0.5  0.5 # 4
+v  0.5 -0.5 -0.5 # 5
+v  0.5 -0.5  0.5 # 6
+v  0.5  0.5 -0.5 # 7
+v  0.5  0.5  0.5 # 8
+
+# Texture coordinates
+vt 0.25 0.3333334   # 1
+vt 0.5  0.3333334   # 2
+vt 0.25 0.6666667   # 3
+vt 0.5  0.6666667   # 4
+vt 0.75 0.3333334   # 5
+vt 1.0  0.3333334   # 6
+vt 0.75 0.6666667   # 7
+vt 1.0  0.6666667   # 8
+vt 0.25 0.0     # 9
+vt 0.5  0.0     # 10
+vt 0.25 1.0     # 11
+vt 0.5  1.0     # 12
+vt 0    0.3333334   # 13
+vt 0    0.6666667   # 14
+
+# Front face (using the front middle part of the texture)
+f 1/1 2/2 3/3
+f 3/3 2/2 4/4
+
+# Back face (using the back middle part of the texture)
+f 5/6 6/5 7/8
+f 7/8 6/5 8/7
+
+# Left face (using the left middle part of the texture)
+f 1/1 3/3 5/13
+f 5/13 3/3 7/14
+
+# Right face (using the right middle part of the texture)
+f 2/2 4/4 6/5
+f 6/5 4/4 8/7
+
+# Top face (UP)
+f 3/3 7/11 4/4
+f 4/4 7/11 8/12
+
+# Bottom face (DN)
+f 1/1 5/9 2/2
+f 2/2 5/9 6/10
