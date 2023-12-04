@@ -1,12 +1,17 @@
 import numpy as np
 import glm
 
+from src.model import Model
+
+min_distance = .2
 class Camera:
     def __init__(self, position: glm.vec3, rotation: glm.vec3, width = 1600, height = 900):
         self.position = position
         self.rotation = rotation
         self.width = width
         self.height = height
+
+        self.models_to_check = []
 
     @property
     def direction(self):
@@ -52,17 +57,65 @@ class Camera:
         self.height = height
 
     def move_forward(self, distance):
+        ds = self.direction_XZ * distance
+        if self.violate_boundaries(ds):
+            return
         # Move a câmera para frente na direção em que está olhando
-        self.position += self.direction_XZ * distance
+        self.position += ds
 
     def move_backward(self, distance):
+        ds = -self.direction_XZ * distance
+        if self.violate_boundaries(ds):
+            return
         # Move a câmera para trás na direção oposta à que está olhando
-        self.position -= self.direction_XZ * distance
+        self.position += ds
 
     def move_right(self, distance):
+        ds = self.right * distance
+        if self.violate_boundaries(ds):
+            return
+
         # Move a câmera para a direita
-        self.position += self.right * distance
+        self.position += ds
 
     def move_left(self, distance):
+        ds = -self.right * distance
+        if self.violate_boundaries(ds):
+            return
+
         # Move a câmera para a esquerda
-        self.position -= self.right * distance
+        self.position += ds
+
+    def set_boundaries(self, model: Model):
+        # Define os limites da câmera com base no modelo
+        self.boundaries = model.get_bounds()
+
+    def violate_boundaries(self, ds: glm.vec3, check_models=True):
+        # Verifica se a câmera viola os limites do modelo
+        # ds é o vetor de deslocamento
+        new_position = self.position + ds
+
+        if new_position.x < self.boundaries['min_x'] + min_distance or new_position.x > self.boundaries['max_x'] - min_distance:
+            return True
+        if new_position.y < self.boundaries['min_y'] + min_distance or new_position.y > self.boundaries['max_y'] - min_distance:
+            return True
+        if new_position.z < self.boundaries['min_z'] + min_distance or new_position.z > self.boundaries['max_z'] - min_distance:
+            return True
+
+        if check_models:
+            remainder_translation = self.check_model_collision(new_position)
+            if remainder_translation:
+                self.position += remainder_translation
+                return True
+        return False
+
+    def check_model_collision(self, new_position):
+        # Verifica se a câmera colide com algum dos modelos
+        for model in self.models_to_check:
+            if model.check_collision(new_position):
+                remainder_translation = model.get_remainder_translation(new_position)
+                return remainder_translation
+        return False
+
+    def add_model_to_check(self, model: Model):
+        self.models_to_check.append(model)
