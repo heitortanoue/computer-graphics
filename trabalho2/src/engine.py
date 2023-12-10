@@ -50,26 +50,96 @@ def mouse_event(window, xpos, ypos):
 vertex_code = """
         attribute vec3 position;
         attribute vec2 texture_coord;
+        attribute vec3 normals;
+        
+       
         varying vec2 out_texture;
-
+        varying vec3 out_fragPos;
+        varying vec3 out_normal;
+                
         uniform mat4 model;
         uniform mat4 view;
-        uniform mat4 projection;
-
+        uniform mat4 projection;        
+        
         void main(){
             gl_Position = projection * view * model * vec4(position,1.0);
             out_texture = vec2(texture_coord);
+            out_fragPos = vec3(model * vec4(position, 1.0));
+            out_normal = normalize(mat3(model) * normals);;            
         }
 """
 
 fragment_code = """
-        uniform vec4 color;
-        varying vec2 out_texture;
-        uniform sampler2D samplerTexture;
+        // parametros da iluminacao ambiente e difusa
+        uniform vec3 lightPos1; // define coordenadas de posicao da luz #1
+        uniform vec3 lightPos2; // define coordenadas de posicao da luz #2
+        uniform float ka; // coeficiente de reflexao ambiente
+        uniform float kd; // coeficiente de reflexao difusa
+        
+        // parametros da iluminacao especular
+        uniform vec3 viewPos; // define coordenadas com a posicao da camera/observador
+        uniform float ks; // coeficiente de reflexao especular
+        uniform float ns; // expoente de reflexao especular
+        
+        // parametro com a cor da(s) fonte(s) de iluminacao
+        vec3 lightColor1 = vec3(1.0, 0.0, 0.0);
+        vec3 lightColor2 = vec3(0.0, 0.0, 1.0);
 
+        // parametros recebidos do vertex shader
+        varying vec2 out_texture; // recebido do vertex shader
+        varying vec3 out_normal; // recebido do vertex shader
+        varying vec3 out_fragPos; // recebido do vertex shader
+        uniform sampler2D samplerTexture;
+        
+        
+        
         void main(){
+        
+            // calculando reflexao ambiente
+            vec3 ambient = ka * vec3(1.0,1.0,1.0);             
+        
+            ////////////////////////
+            // Luz #1
+            ////////////////////////
+            
+            // calculando reflexao difusa
+            vec3 norm1 = normalize(out_normal); // normaliza vetores perpendiculares
+            vec3 lightDir1 = normalize(lightPos1 - out_fragPos); // direcao da luz
+            float diff1 = max(dot(norm1, lightDir1), 0.0); // verifica limite angular (entre 0 e 90)
+            vec3 diffuse1 = kd * diff1 * lightColor1; // iluminacao difusa
+            
+            // calculando reflexao especular
+            vec3 viewDir1 = normalize(viewPos - out_fragPos); // direcao do observador/camera
+            vec3 reflectDir1 = reflect(-lightDir1, norm1); // direcao da reflexao
+            float spec1 = pow(max(dot(viewDir1, reflectDir1), 0.0), ns);
+            vec3 specular1 = ks * spec1 * lightColor1;    
+            
+            
+            ////////////////////////
+            // Luz #2
+            ////////////////////////
+            
+            // calculando reflexao difusa
+            vec3 norm2 = normalize(out_normal); // normaliza vetores perpendiculares
+            vec3 lightDir2 = normalize(lightPos2 - out_fragPos); // direcao da luz
+            float diff2 = max(dot(norm2, lightDir2), 0.0); // verifica limite angular (entre 0 e 90)
+            vec3 diffuse2 = kd * diff2 * lightColor2; // iluminacao difusa
+            
+            // calculando reflexao especular
+            vec3 viewDir2 = normalize(viewPos - out_fragPos); // direcao do observador/camera
+            vec3 reflectDir2 = reflect(-lightDir2, norm2); // direcao da reflexao
+            float spec2 = pow(max(dot(viewDir2, reflectDir2), 0.0), ns);
+            vec3 specular2 = ks * spec2 * lightColor2;    
+            
+            ////////////////////////
+            // Combinando as duas fontes
+            ////////////////////////
+            
+            // aplicando o modelo de iluminacao
             vec4 texture = texture2D(samplerTexture, out_texture);
-            gl_FragColor = texture;
+            vec4 result = vec4((ambient + diffuse1 + diffuse2 + specular1 + specular2),1.0) * texture; // aplica iluminacao
+            gl_FragColor = result;
+
         }
 """
 
@@ -89,6 +159,9 @@ class Engine:
             position = glm.vec3(0, 0, 0),
             rotation = glm.vec3(0, 0, 0),
         )
+        self.lightPos1 = glm.vec3(0.9, 0.0, 2.0)  # Posição da fonte de luz
+        self.lightPos2 = glm.vec3(0.0, 0.9, 2.0) # Posição da fonte de luz
+        self.light_color = glm.vec3(1.0, 1.0, 1.0)  # Cor da fonte de luz
         self.init()
 
 
@@ -104,6 +177,18 @@ class Engine:
             "scale": skybox_scale,
         })
         self.camera.set_boundaries(skybox)
+
+        luz1 = self.loadModel("luz", {
+            "scale": 0.01,
+            "translation": self.lightPos1,
+        })
+        self.camera.add_model_to_check(luz1)
+
+        luz2 = self.loadModel("luz", {
+            "scale": 0.01,
+            "translation": self.lightPos2,
+        })
+        self.camera.add_model_to_check(luz2)
 
         skull = self.loadModel("skull", {
             "scale": 0.02,
@@ -293,12 +378,12 @@ class Engine:
         modelData = modelo.model
 
         # Request a buffer slot from GPU
-        modelo.buffer = glGenBuffers(2)
+        modelo.buffer = glGenBuffers(3)
 
         printMessage(f'Processing OBJ Model. Initial vertex count: {len(modelo.vertices)}', 'grey')
 
         for face_data in modelData['faces']:
-            face, texture, materials = face_data
+            face, texture, normals, materials = face_data
 
             for vert_idx in face:
                 modelo.vertices.append(modelData['vertices'][vert_idx - 1])
@@ -308,6 +393,12 @@ class Engine:
                     modelo.texture_coords.append(modelData['texture'][tex_idx - 1])
                 else:
                     modelo.texture_coords.append([0.0, 0.0])  # Default texture coordinate
+            
+            for norm_idx in normals:
+                if norm_idx > 0:
+                    modelo.normals_coords.append(modelData['normals'][norm_idx - 1])
+                else:
+                    modelo.normals_coords.append([0.0, 0.0, 0.0])
 
         printMessage(f'Processing OBJ Model. Final vertex count: {len(modelo.vertices)}', 'grey')
 
@@ -345,6 +436,18 @@ class Engine:
         glEnableVertexAttribArray(loc_texture_coord)
         glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, False, stride, offset)
 
+        normals = np.zeros(len(modelo.normals_coords), [("position", np.float32, 3)]) # três coordenadas
+        normals['position'] = modelo.normals_coords
+
+        # Upload coordenadas normals de cada vertice
+        glBindBuffer(GL_ARRAY_BUFFER, modelo.buffer[2])
+        glBufferData(GL_ARRAY_BUFFER, normals.nbytes, normals, GL_STATIC_DRAW)
+        stride = normals.strides[0]
+        offset = ctypes.c_void_p(0)
+        loc_normals_coord = glGetAttribLocation(self.program, "normals")
+        glEnableVertexAttribArray(loc_normals_coord)
+        glVertexAttribPointer(loc_normals_coord, 3, GL_FLOAT, False, stride, offset)
+
 
     def drawModel(self, model):
         # Ativa o buffer de vértices para o modelo atual
@@ -358,6 +461,50 @@ class Engine:
         loc_texture_coord = glGetAttribLocation(self.program, "texture_coord")
         glEnableVertexAttribArray(loc_texture_coord)
         glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, False, 0, None)
+
+        #Configura iluminação
+        glBindBuffer(GL_ARRAY_BUFFER, model.buffer[2])
+        loc_normals_coord = glGetAttribLocation(self.program, "normals_coord")
+        if loc_normals_coord >= 0:
+            glEnableVertexAttribArray(loc_normals_coord)
+            glVertexAttribPointer(loc_normals_coord, 3, GL_FLOAT, False, 0, None)
+
+        if model.name == 'luz1' or model.name == 'luz2':
+            ka = 1 # coeficiente de reflexao ambiente do modelo
+            kd = 1 # coeficiente de reflexao difusa do modelo
+            ks = 1 # coeficiente de reflexao especular do modelo
+            ns = 1000.0 # expoente de reflexao especular
+
+        elif model.name == 'skybox':
+            ka = 0.3 # coeficiente de reflexao ambiente do modelo
+            kd = 0.3 # coeficiente de reflexao difusa do modelo
+            ks = 0.9 # coeficiente de reflexao especular do modelo
+            ns = 64.0 # expoente de reflexao especular
+
+        else:
+            ka = 0.8 # coeficiente de reflexao ambiente do modelo
+            kd = 0.8 # coeficiente de reflexao difusa do modelo
+            ks = 0.8 # coeficiente de reflexao especular do modelo
+            ns = 32.0 # expoente de reflexao especular
+        
+        loc_ka = glGetUniformLocation(self.program, "ka") # recuperando localizacao da variavel ka na GPU
+        glUniform1f(loc_ka, ka) ### envia ka pra gpu
+        
+        loc_kd = glGetUniformLocation(self.program, "kd") # recuperando localizacao da variavel kd na GPU
+        glUniform1f(loc_kd, kd) ### envia kd pra gpu    
+        
+        loc_ks = glGetUniformLocation(self.program, "ks") # recuperando localizacao da variavel ks na GPU
+        glUniform1f(loc_ks, ks) ### envia ks pra gpu        
+        
+        loc_ns = glGetUniformLocation(self.program, "ns") # recuperando localizacao da variavel ns na GPU
+        glUniform1f(loc_ns, ns) ### envia ns pra gpu
+
+        if model.name == 'luz1':
+            loc_lightPos1 = glGetUniformLocation(self.program, "lightPos1")
+            glUniform3f(loc_lightPos1, self.lightPos1.x, self.lightPos1.y, self.lightPos1.z)
+        elif model.name == 'luz2':
+            loc_lightPos2 = glGetUniformLocation(self.program, "lightPos2")
+            glUniform3f(loc_lightPos2, self.lightPos2.x, self.lightPos1.y, self.lightPos1.z)
 
         glBindTexture(GL_TEXTURE_2D, model.id)
 
@@ -424,4 +571,22 @@ class Engine:
 
         if key == glfw.KEY_D:
             self.camera.move_right(translationSpeed)
+            return
+        
+        light_move_speed = 0.1
+
+        if key == glfw.KEY_UP and action == glfw.PRESS:
+            self.lightPos1.x += light_move_speed
+            return
+
+        if key == glfw.KEY_DOWN and action == glfw.PRESS:
+            self.lightPos1.x -= light_move_speed
+            return
+
+        if key == glfw.KEY_RIGHT and action == glfw.PRESS:
+            self.lightPos1.y += light_move_speed
+            return
+
+        if key == glfw.KEY_LEFT and action == glfw.PRESS:
+            self.lightPos1.y -= light_move_speed
             return

@@ -67,41 +67,57 @@ def create_model_path(model, extension):
     return full_path
 
 def load_model_from_file(filename):
-    """Loads a Wavefront OBJ file."""
     vertices = []
+    normals_coords = []
     texture_coords = []
     faces = []
 
     material = None
 
-    # Open the .obj file for reading
-    for line in open(filename, "r"):
-        if line.startswith('#'): continue  # Ignore comments
-        values = line.split()
+    # abre o arquivo obj para leitura
+    for line in open(filename, "r"): ## para cada linha do arquivo .obj
+        if line.startswith('#'): continue ## ignora comentarios
+        values = line.split() # quebra a linha por espaço
         if not values: continue
 
+
+        ### recuperando vertices
         if values[0] == 'v':
             vertices.append(list(map(float, values[1:4])))
+
+        ### recuperando vertices
+        if values[0] == 'vn':
+            normals_coords.append(list(map(float, values[1:4])))
+
+        ### recuperando coordenadas de textura
         elif values[0] == 'vt':
             texture_coords.append(list(map(float, values[1:3])))
+
+        ### recuperando faces 
         elif values[0] in ('usemtl', 'usemat'):
             material = values[1]
         elif values[0] == 'f':
-            # Handle faces with more than 3 vertices (polygon to triangle fan)
             verts = values[1:]
             v0 = verts[0]
             for i in range(1, len(verts) - 1):
                 v1 = verts[i]
                 v2 = verts[i + 1]
                 face = [int(v0.split('/')[0]), int(v1.split('/')[0]), int(v2.split('/')[0])]
-                # Process texture if available
+                
                 if len(v0.split('/')) > 1 and v0.split('/')[1]:
                     texture = [int(v0.split('/')[1]), int(v1.split('/')[1]), int(v2.split('/')[1])]
                 else:
-                    texture = [0, 0, 0]  # Default texture indices
-                faces.append((face, texture, material))
+                    texture = [0, 0, 0]
+                
+                if len(v0.split('/')) > 2 and v0.split('/')[2]:
+                    normals = [int(v0.split('/')[2]), int(v1.split('/')[2]), int(v2.split('/')[2])]
+                else:
+                    normals = [0, 0, 0]
 
-    return {'vertices': vertices, 'texture': texture_coords, 'faces': faces}
+            faces.append((face, texture, normals, material))
+
+
+    return {'vertices': vertices, 'texture': texture_coords, 'normals': normals_coords, 'faces': faces}
 
 def printMessage(message, color=None):
     if color is None:

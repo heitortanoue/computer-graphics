@@ -16,6 +16,7 @@ class Model:
 
         self.vertices = []
         self.texture_coords = []
+        self.normals_coords = []
         self.bounds = {}
 
         proportions = getModelProportions(self)
