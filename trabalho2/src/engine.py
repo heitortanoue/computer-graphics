@@ -67,9 +67,13 @@ fragment_code = """
         varying vec2 out_texture;
         uniform sampler2D samplerTexture;
 
+        const vec3 ambientColor = vec3(1, 1, 1); // White ambient light
+        uniform float ambientIntensity; // Intensity of ambient light
+
         void main(){
             vec4 texture = texture2D(samplerTexture, out_texture);
-            gl_FragColor = texture;
+            vec4 ambient = vec4(ambientColor, 1.0) * ambientIntensity;
+            gl_FragColor = texture * ambient;
         }
 """
 
@@ -89,6 +93,7 @@ class Engine:
             position = glm.vec3(0, 0, 0),
             rotation = glm.vec3(0, 0, 0),
         )
+        self.ambientIntensity = 0.5
         self.init()
 
 
@@ -98,6 +103,8 @@ class Engine:
         self.initShaders()
         self.buildProgram()
         self.initTextures()
+
+        glUniform1f(glGetUniformLocation(self.program, "ambientIntensity"), self.ambientIntensity)
 
         skybox_scale = 20
         skybox = self.loadModel('skybox', {
