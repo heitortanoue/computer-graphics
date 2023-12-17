@@ -3,6 +3,12 @@ import glm
 import math
 from termcolor import colored
 
+def readShaderFile(filename):
+    """Reads a shader file and returns the file contents"""
+    path = create_path('shaders/' + filename)
+    with open(path, 'r') as file:
+        return file.read()
+
 def getModelProportions(modelo):
     x_max = -math.inf
     x_min = math.inf
@@ -57,20 +63,24 @@ def getModelProportions(modelo):
         "depth": depth,
     }
 
-def create_model_path(model, extension):
+def create_path(path):
     # Get the current directory of the script
     script_directory = os.path.dirname(os.path.abspath(__file__))
     # Navigate to the parent directory (i.e., go up one level)
     parent_directory = os.path.dirname(script_directory)
     # Join the parent directory with "objs/model/model.obj"
-    full_path = os.path.join(parent_directory, "objs", model, model + '.' + extension)
+    full_path = os.path.join(parent_directory, path)
     return full_path
+
+def create_model_path(model, extension):
+    return create_path('objs/' + model + '/' + model + '.' + extension)
 
 def load_model_from_file(filename):
     """Loads a Wavefront OBJ file."""
     vertices = []
     texture_coords = []
     faces = []
+    normals = []
 
     material = None
 
@@ -82,10 +92,16 @@ def load_model_from_file(filename):
 
         if values[0] == 'v':
             vertices.append(list(map(float, values[1:4])))
+
         elif values[0] == 'vt':
             texture_coords.append(list(map(float, values[1:3])))
+
+        elif values[0] == 'vn':
+            normals.append(list(map(float, values[1:4])))
+
         elif values[0] in ('usemtl', 'usemat'):
             material = values[1]
+
         elif values[0] == 'f':
             # Handle faces with more than 3 vertices (polygon to triangle fan)
             verts = values[1:]
@@ -94,18 +110,25 @@ def load_model_from_file(filename):
                 v1 = verts[i]
                 v2 = verts[i + 1]
                 face = [int(v0.split('/')[0]), int(v1.split('/')[0]), int(v2.split('/')[0])]
+
                 # Process texture if available
                 if len(v0.split('/')) > 1 and v0.split('/')[1]:
                     texture = [int(v0.split('/')[1]), int(v1.split('/')[1]), int(v2.split('/')[1])]
                 else:
                     texture = [0, 0, 0]  # Default texture indices
-                faces.append((face, texture, material))
 
-    return {'vertices': vertices, 'texture': texture_coords, 'faces': faces}
+                # Process normals if available
+                if len(v0.split('/')) > 2 and v0.split('/')[2]:
+                    normal = [int(v0.split('/')[2]), int(v1.split('/')[2]), int(v2.split('/')[2])]
+                else:
+                    normal = [0, 0, 0]
+
+                faces.append((face, texture, normal, material))
+
+    return {'vertices': vertices, 'texture': texture_coords, 'normals': normals, 'faces': faces}
 
 def printMessage(message, color=None):
     if color is None:
         print(message)
     else:
         print(colored(message, color))
-

@@ -47,35 +47,8 @@ def mouse_event(window, xpos, ypos):
     if engine.camera.rotation.x < -1.5:
         engine.camera.rotation.x = -1.5
 
-vertex_code = """
-        attribute vec3 position;
-        attribute vec2 texture_coord;
-        varying vec2 out_texture;
-
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-
-        void main(){
-            gl_Position = projection * view * model * vec4(position,1.0);
-            out_texture = vec2(texture_coord);
-        }
-"""
-
-fragment_code = """
-        uniform vec4 color;
-        varying vec2 out_texture;
-        uniform sampler2D samplerTexture;
-
-        const vec3 ambientColor = vec3(1, 1, 1); // White ambient light
-        uniform float ambientIntensity; // Intensity of ambient light
-
-        void main(){
-            vec4 texture = texture2D(samplerTexture, out_texture);
-            vec4 ambient = vec4(ambientColor, 1.0) * ambientIntensity;
-            gl_FragColor = texture * ambient;
-        }
-"""
+vertex_code = readShaderFile('vertex.glsl')
+fragment_code = readShaderFile('fragment.glsl')
 
 class Engine:
     boundaries = glm.vec4(0,0,0,0)
@@ -93,7 +66,6 @@ class Engine:
             position = glm.vec3(0, 0, 0),
             rotation = glm.vec3(0, 0, 0),
         )
-        self.ambientIntensity = 0.5
         self.init()
 
 
@@ -104,7 +76,21 @@ class Engine:
         self.buildProgram()
         self.initTextures()
 
-        glUniform1f(glGetUniformLocation(self.program, "ambientIntensity"), self.ambientIntensity)
+        # luz deve ser o primeiro objeto a ser adicionado
+        light = self.loadModel("light", {
+            "scale": 0.05,
+            "rotation": glm.vec3(0, 0, 0),
+            "translation": glm.vec3(0, 0, 0),
+            "light": {
+                "ambient": 1,
+                "diffuse": 1,
+                "specular": 1,
+                "shininess": 1000,
+                "is_light_source": True,
+            }
+        })
+        # nao adiciona luz para checar colisao
+        # self.camera.add_model_to_check(light)
 
         skybox_scale = 20
         skybox = self.loadModel('skybox', {
@@ -159,7 +145,7 @@ class Engine:
             glfw.poll_events()
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-            glClearColor(1.0, 1.0, 1.0, 1.0)
+            glClearColor(0.2, 0.2, 0.2, 1.0)
 
             # Configura a câmera para todos os modelos
             loc_view = glGetUniformLocation(self.program, "view")
@@ -167,6 +153,10 @@ class Engine:
 
             loc_projection = glGetUniformLocation(self.program, "projection")
             glUniformMatrix4fv(loc_projection, 1, GL_FALSE, np.array(self.camera.projection_matrix()).T)
+
+            # Configura a posição da câmera na GPU
+            loc_view_pos = glGetUniformLocation(self.program, "view_position")
+            glUniform3f(loc_view_pos, self.camera.position.x, self.camera.position.y, self.camera.position.z)
 
             # Desenha todos os modelos
             self.drawAllModels()
@@ -176,6 +166,7 @@ class Engine:
         glfw.terminate()
 
     def drawAllModels(self):
+        printMessage('Drawing Models...', 'green')
         for model in self.objects:
             # Aplica transformações ao modelo atual
             model.applyTransformations()
@@ -183,6 +174,24 @@ class Engine:
             # Configura a matriz de modelo
             loc_model = glGetUniformLocation(self.program, "model")
             glUniformMatrix4fv(loc_model, 1, GL_FALSE, np.array(model.mat_transform).T)
+
+            # print('valores de iluminação: ', model.name, model.ka, model.kd, model.ks, model.ns, model.is_light_source, '\n')
+            # Aplica iluminação
+            loc_ka = glGetUniformLocation(self.program, "ka")
+            glUniform1f(loc_ka, model.ka)
+
+            loc_kd = glGetUniformLocation(self.program, "kd")
+            glUniform1f(loc_kd, model.kd)
+
+            loc_ks = glGetUniformLocation(self.program, "ks")
+            glUniform1f(loc_ks, model.ks)
+
+            loc_ns = glGetUniformLocation(self.program, "ns")
+            glUniform1f(loc_ns, model.ns)
+
+            if model.is_light_source:
+                loc_light_pos = glGetUniformLocation(self.program, "light_position")
+                glUniform3f(loc_light_pos, model.translation.x, model.translation.y, model.translation.z)
 
             # Desenha o modelo
             self.drawModel(model)
@@ -216,8 +225,8 @@ class Engine:
         # Obtém a resolução da tela do monitor
         largura, altura = glfw.get_video_mode (monitor)[0]
 
-        # Cria a janela em tela cheia
-        self.window = glfw.create_window(largura, altura, "Trabalho 1", monitor, None)
+        # Cria a janela em modo janela
+        self.window = glfw.create_window(largura, altura - 30, "Trabalho 2", None, None)
 
         glfw.make_context_current(self.window)
         glfw.set_window_user_pointer(self.window, self)
@@ -266,7 +275,7 @@ class Engine:
     def initTextures(self):
         printMessage('Initializing Textures...', 'green')
         glEnable(GL_TEXTURE_2D)
-        qtd_texturas = 5
+        qtd_texturas = 10
         self.textures = glGenTextures(qtd_texturas)
 
 
@@ -300,12 +309,12 @@ class Engine:
         modelData = modelo.model
 
         # Request a buffer slot from GPU
-        modelo.buffer = glGenBuffers(2)
+        modelo.buffer = glGenBuffers(3)
 
         printMessage(f'Processing OBJ Model. Initial vertex count: {len(modelo.vertices)}', 'grey')
 
         for face_data in modelData['faces']:
-            face, texture, materials = face_data
+            face, texture, normals, materials = face_data
 
             for vert_idx in face:
                 modelo.vertices.append(modelData['vertices'][vert_idx - 1])
@@ -315,6 +324,12 @@ class Engine:
                     modelo.texture_coords.append(modelData['texture'][tex_idx - 1])
                 else:
                     modelo.texture_coords.append([0.0, 0.0])  # Default texture coordinate
+
+            for norm_idx in normals:
+                if norm_idx > 0:
+                    modelo.normals.append(modelData['normals'][norm_idx - 1])
+                else:
+                    modelo.normals.append([0.0, 0.0, 0.0]) # Default normal
 
         printMessage(f'Processing OBJ Model. Final vertex count: {len(modelo.vertices)}', 'grey')
 
@@ -352,6 +367,18 @@ class Engine:
         glEnableVertexAttribArray(loc_texture_coord)
         glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, False, stride, offset)
 
+        normals = np.zeros(len(modelo.normals), [("position", np.float32, 3)]) # três coordenadas
+        normals['position'] = modelo.normals
+
+        # Upload data
+        glBindBuffer(GL_ARRAY_BUFFER, modelo.buffer[2])
+        glBufferData(GL_ARRAY_BUFFER, normals.nbytes, normals, GL_STATIC_DRAW)
+        stride = normals.strides[0]
+        offset = ctypes.c_void_p(0)
+        loc_normals = glGetAttribLocation(self.program, "normals")
+        glEnableVertexAttribArray(loc_normals)
+        glVertexAttribPointer(loc_normals, 3, GL_FLOAT, False, stride, offset)
+
 
     def drawModel(self, model):
         # Ativa o buffer de vértices para o modelo atual
@@ -365,6 +392,8 @@ class Engine:
         loc_texture_coord = glGetAttribLocation(self.program, "texture_coord")
         glEnableVertexAttribArray(loc_texture_coord)
         glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, False, 0, None)
+
+
 
         glBindTexture(GL_TEXTURE_2D, model.id)
 
