@@ -66,6 +66,7 @@ class Engine:
             position = glm.vec3(0, 0, 0),
             rotation = glm.vec3(0, 0, 0),
         )
+        self.vCount = 0
         self.init()
 
 
@@ -76,25 +77,14 @@ class Engine:
         self.buildProgram()
         self.initTextures()
 
-        # luz deve ser o primeiro objeto a ser adicionado
-        light = self.loadModel("light", {
-            "scale": 0.05,
-            "rotation": glm.vec3(0, 0, 0),
-            "translation": glm.vec3(0, 0, 0),
-            "light": {
-                "ambient": 1,
-                "diffuse": 1,
-                "specular": 1,
-                "shininess": 1000,
-                "is_light_source": True,
-            }
-        })
-        # nao adiciona luz para checar colisao
-        # self.camera.add_model_to_check(light)
-
         skybox_scale = 20
         skybox = self.loadModel('skybox', {
             "scale": skybox_scale,
+            "light": {
+                "ambient": 1,
+                "diffuse": 0,
+                "specular": 0,
+            }
         })
         self.camera.set_boundaries(skybox)
 
@@ -133,6 +123,21 @@ class Engine:
         })
         self.camera.add_model_to_check(monster)
 
+        self.loadModel("light", {
+            "scale": 0.1,
+            "rotation": glm.vec3(0, 0, 0),
+            "translation": glm.vec3(0, 2, 0),
+            "light": {
+                "ambient": 1,
+                "diffuse": 1,
+                "specular": 1,
+                "shininess": 1000,
+                "is_light_source": True,
+            }
+        })
+
+        self.loadAllBuffers()
+
         self.showWindow()
         printMessage("Engine initialized.", "green")
 
@@ -147,6 +152,9 @@ class Engine:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             glClearColor(0.2, 0.2, 0.2, 1.0)
 
+            # Desenha todos os modelos
+            self.drawAllModels()
+
             # Configura a câmera para todos os modelos
             loc_view = glGetUniformLocation(self.program, "view")
             glUniformMatrix4fv(loc_view, 1, GL_FALSE, np.array(self.camera.view_matrix()).T)
@@ -158,15 +166,12 @@ class Engine:
             loc_view_pos = glGetUniformLocation(self.program, "view_position")
             glUniform3f(loc_view_pos, self.camera.position.x, self.camera.position.y, self.camera.position.z)
 
-            # Desenha todos os modelos
-            self.drawAllModels()
 
             glfw.swap_buffers(self.window)
 
         glfw.terminate()
 
     def drawAllModels(self):
-        printMessage('Drawing Models...', 'green')
         for model in self.objects:
             # Aplica transformações ao modelo atual
             model.applyTransformations()
@@ -175,7 +180,6 @@ class Engine:
             loc_model = glGetUniformLocation(self.program, "model")
             glUniformMatrix4fv(loc_model, 1, GL_FALSE, np.array(model.mat_transform).T)
 
-            # print('valores de iluminação: ', model.name, model.ka, model.kd, model.ks, model.ns, model.is_light_source, '\n')
             # Aplica iluminação
             loc_ka = glGetUniformLocation(self.program, "ka")
             glUniform1f(loc_ka, model.ka)
@@ -275,7 +279,7 @@ class Engine:
     def initTextures(self):
         printMessage('Initializing Textures...', 'green')
         glEnable(GL_TEXTURE_2D)
-        qtd_texturas = 10
+        qtd_texturas = 20
         self.textures = glGenTextures(qtd_texturas)
 
 
@@ -308,13 +312,10 @@ class Engine:
         self.last_index += 1
         modelData = modelo.model
 
-        # Request a buffer slot from GPU
-        modelo.buffer = glGenBuffers(3)
-
         printMessage(f'Processing OBJ Model. Initial vertex count: {len(modelo.vertices)}', 'grey')
 
         for face_data in modelData['faces']:
-            face, texture, normals, materials = face_data
+            face, texture, normal, materials = face_data
 
             for vert_idx in face:
                 modelo.vertices.append(modelData['vertices'][vert_idx - 1])
@@ -325,7 +326,7 @@ class Engine:
                 else:
                     modelo.texture_coords.append([0.0, 0.0])  # Default texture coordinate
 
-            for norm_idx in normals:
+            for norm_idx in normal:
                 if norm_idx > 0:
                     modelo.normals.append(modelData['normals'][norm_idx - 1])
                 else:
@@ -335,18 +336,30 @@ class Engine:
 
         # Load the texture for the model and define a buffer ID
         self.load_texture_from_file(modelo.id, filename)
-        self.setModelBuffers(modelo)
+        # self.setModelBuffers(modelo)
         self.objects.append(modelo)
 
         return modelo
 
 
-    def setModelBuffers(self, modelo):
-        vertices = np.zeros(len(modelo.vertices), [("position", np.float32, 3)])
-        vertices['position'] = modelo.vertices
+    def loadAllBuffers(self):
+        allVertices = []
+        allTextures = []
+        allNormals = []
+
+        # Concatena todos os vértices, texturas e normais de todos os modelos
+        for model in self.objects:
+            allVertices += model.vertices
+            allTextures += model.texture_coords
+            allNormals += model.normals
+
+        self.buffers = glGenBuffers(3)
+
+        vertices = np.zeros(len(allVertices), [("position", np.float32, 3)])
+        vertices['position'] = allVertices
 
         # Upload data
-        glBindBuffer(GL_ARRAY_BUFFER, modelo.buffer[0])
+        glBindBuffer(GL_ARRAY_BUFFER, self.buffers[0])
         glBufferData(GL_ARRAY_BUFFER, vertices.nbytes, vertices, GL_STATIC_DRAW)
         stride = vertices.strides[0]
         offset = ctypes.c_void_p(0)
@@ -355,11 +368,11 @@ class Engine:
         glVertexAttribPointer(loc_vertices, 3, GL_FLOAT, False, stride, offset)
 
 
-        textures = np.zeros(len(modelo.texture_coords), [("position", np.float32, 2)]) # duas coordenadas
-        textures['position'] = modelo.texture_coords
+        textures = np.zeros(len(allTextures), [("position", np.float32, 2)]) # duas coordenadas
+        textures['position'] = allTextures
 
         # Upload data
-        glBindBuffer(GL_ARRAY_BUFFER, modelo.buffer[1])
+        glBindBuffer(GL_ARRAY_BUFFER, self.buffers[1])
         glBufferData(GL_ARRAY_BUFFER, textures.nbytes, textures, GL_STATIC_DRAW)
         stride = textures.strides[0]
         offset = ctypes.c_void_p(0)
@@ -367,11 +380,11 @@ class Engine:
         glEnableVertexAttribArray(loc_texture_coord)
         glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, False, stride, offset)
 
-        normals = np.zeros(len(modelo.normals), [("position", np.float32, 3)]) # três coordenadas
-        normals['position'] = modelo.normals
+        normals = np.zeros(len(allNormals), [("position", np.float32, 3)]) # três coordenadas
+        normals['position'] = allNormals
 
         # Upload data
-        glBindBuffer(GL_ARRAY_BUFFER, modelo.buffer[2])
+        glBindBuffer(GL_ARRAY_BUFFER, self.buffers[2])
         glBufferData(GL_ARRAY_BUFFER, normals.nbytes, normals, GL_STATIC_DRAW)
         stride = normals.strides[0]
         offset = ctypes.c_void_p(0)
@@ -381,24 +394,16 @@ class Engine:
 
 
     def drawModel(self, model):
-        # Ativa o buffer de vértices para o modelo atual
-        glBindBuffer(GL_ARRAY_BUFFER, model.buffer[0])
-        loc_vertices = glGetAttribLocation(self.program, "position")
-        glEnableVertexAttribArray(loc_vertices)
-        glVertexAttribPointer(loc_vertices, 3, GL_FLOAT, False, 0, None)
-
-        # Ativa o buffer de coordenadas de textura para o modelo atual
-        glBindBuffer(GL_ARRAY_BUFFER, model.buffer[1])
-        loc_texture_coord = glGetAttribLocation(self.program, "texture_coord")
-        glEnableVertexAttribArray(loc_texture_coord)
-        glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, False, 0, None)
-
-
-
         glBindTexture(GL_TEXTURE_2D, model.id)
 
         # desenha o modelo
-        glDrawArrays(GL_TRIANGLES, 0, len(model.vertices))
+        glDrawArrays(GL_TRIANGLES, self.vCount, len(model.vertices))
+
+        # atualiza o contador de vértices, se é o último modelo, zera
+        if model.id == self.objects[-1].id:
+            self.vCount = 0
+        else:
+            self.vCount += len(model.vertices)
 
         edges = [
             (0, 1), (1, 3), (3, 2), (2, 0),  # Top edges

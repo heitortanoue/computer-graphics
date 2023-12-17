@@ -33,10 +33,11 @@ class Model:
         lightInitialValues = initial_values.get("light", {})
 
         self.ka = lightInitialValues.get("ambient", 0.2)
-        self.kd = lightInitialValues.get("diffuse", 0.6)
-        self.ks = lightInitialValues.get("specular", 0.8)
+        self.kd = lightInitialValues.get("diffuse", 1)
+        self.ks = lightInitialValues.get("specular", 1)
         self.ns = lightInitialValues.get("shininess", 32)
         self.is_light_source = lightInitialValues.get("is_light_source", False)
+
 
         self.applyTransformations() # aplica valores iniciais
 

@@ -95,6 +95,10 @@ class Camera:
         # ds é o vetor de deslocamento
         new_position = self.position + ds
 
+        # se nao tem limites ou o atributo, retorna False
+        if not hasattr(self, 'boundaries'):
+            return False
+
         if new_position.x < self.boundaries['min_x'] + min_distance or new_position.x > self.boundaries['max_x'] - min_distance:
             return True
         if new_position.y < self.boundaries['min_y'] + min_distance or new_position.y > self.boundaries['max_y'] - min_distance:
