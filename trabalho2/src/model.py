@@ -16,6 +16,7 @@ class Model:
 
         self.vertices = []
         self.texture_coords = []
+        self.normals = []
         self.bounds = {}
 
         proportions = getModelProportions(self)
@@ -28,6 +29,15 @@ class Model:
         self.scale = initial_values.get("scale", 1)
         self.rotation = glm.vec3(*initial_values.get("rotation", [0, 0, 0]))
         self.translation = glm.vec3(*initial_values.get("translation", [0, 0, 0]))
+
+        lightInitialValues = initial_values.get("light", {})
+
+        self.ka = lightInitialValues.get("ambient", 0.2)
+        self.kd = lightInitialValues.get("diffuse", 1)
+        self.ks = lightInitialValues.get("specular", 1)
+        self.ns = lightInitialValues.get("shininess", 32)
+        self.is_light_source = lightInitialValues.get("is_light_source", False)
+
         self.applyTransformations() # aplica valores iniciais
 
         # Set bounding box

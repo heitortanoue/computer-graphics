@@ -24,26 +24,34 @@ vt 0.5  1.0     # 12
 vt 0    0.3333334   # 13
 vt 0    0.6666667   # 14
 
+# Normals
+vn  0.0  0.0 -1.0  # Frente
+vn  0.0  0.0  1.0  # Traseira
+vn -1.0  0.0  0.0  # Esquerda
+vn  1.0  0.0  0.0  # Direita
+vn  0.0  1.0  0.0  # Topo
+vn  0.0 -1.0  0.0  # Base
+
 # Front face (using the front middle part of the texture)
-f 1/1 2/2 3/3
-f 3/3 2/2 4/4
+f 1/1/1 2/2/1 3/3/1
+f 3/3/1 2/2/1 4/4/1
 
 # Back face (using the back middle part of the texture)
-f 5/6 6/5 7/8
-f 7/8 6/5 8/7
+f 5/6/2 6/5/2 7/8/2
+f 7/8/2 6/5/2 8/7/2
 
 # Left face (using the left middle part of the texture)
-f 1/1 3/3 5/13
-f 5/13 3/3 7/14
+f 1/1/3 3/3/3 5/13/3
+f 5/13/3 3/3/3 7/14/3
 
 # Right face (using the right middle part of the texture)
-f 2/2 4/4 6/5
-f 6/5 4/4 8/7
+f 2/2/4 4/4/4 6/5/4
+f 6/5/4 4/4/4 8/7/4
 
 # Top face (UP)
-f 3/3 7/11 4/4
-f 4/4 7/11 8/12
+f 3/3/5 7/11/5 4/4/5
+f 4/4/5 7/11/5 8/12/5
 
 # Bottom face (DN)
-f 1/1 5/9 2/2
-f 2/2 5/9 6/10
+f 1/1/6 5/9/6 2/2/6
+f 2/2/6 5/9/6 6/10/6
