@@ -89,8 +89,6 @@ class Engine:
                 "is_light_source": True,
             }
         })
-        # nao adiciona luz para checar colisao
-        # self.camera.add_model_to_check(light)
 
         skybox_scale = 20
         skybox = self.loadModel('skybox', {
@@ -460,4 +458,34 @@ class Engine:
 
         if key == glfw.KEY_D:
             self.camera.move_right(translationSpeed)
+            return
+        
+        lightSpeed = 0.05
+
+        if key == glfw.KEY_UP:
+            self.objects[0].translation.z += lightSpeed
+            self.objects[0].applyTransformations()
+            loc_light_pos = glGetUniformLocation(self.program, "light_position")
+            glUniform3f(loc_light_pos, self.objects[0].translation.x, self.objects[0].translation.y, self.objects[0].translation.z)
+            return
+        
+        if key == glfw.KEY_DOWN:
+            self.objects[0].translation.z -= lightSpeed
+            self.objects[0].applyTransformations()
+            loc_light_pos = glGetUniformLocation(self.program, "light_position")
+            glUniform3f(loc_light_pos, self.objects[0].translation.x, self.objects[0].translation.y, self.objects[0].translation.z)
+            return
+        
+        if key == glfw.KEY_LEFT:
+            self.objects[0].translation.x -= lightSpeed
+            self.objects[0].applyTransformations()
+            loc_light_pos = glGetUniformLocation(self.program, "light_position")
+            glUniform3f(loc_light_pos, self.objects[0].translation.x, self.objects[0].translation.y, self.objects[0].translation.z)
+            return
+        
+        if key == glfw.KEY_RIGHT:
+            self.objects[0].translation.x += lightSpeed
+            self.objects[0].applyTransformations()
+            loc_light_pos = glGetUniformLocation(self.program, "light_position")
+            glUniform3f(loc_light_pos, self.objects[0].translation.x, self.objects[0].translation.y, self.objects[0].translation.z)
             return
