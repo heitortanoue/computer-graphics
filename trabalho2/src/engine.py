@@ -95,12 +95,12 @@ class Engine:
         })
         self.camera.add_model_to_check(skull)
 
-        statue = self.loadModel("statue", {
-            "scale": 0.005,
+        clock = self.loadModel("clock", {
+            "scale": 0.1,
             "rotation": glm.vec3(-1.57, 0, 0),
-            "translation": glm.vec3(-0.5, -0.63, 0),
+            "translation": glm.vec3(-0.5, 0, 0),
         })
-        self.camera.add_model_to_check(statue)
+        self.camera.add_model_to_check(clock)
 
         cat = self.loadModel("cat", {
             "scale": 0.006,
@@ -116,12 +116,12 @@ class Engine:
         })
         self.camera.add_model_to_check(raptor)
 
-        monster = self.loadModel("monster", {
-            "scale": 0.1,
+        penguin = self.loadModel("penguin", {
+            "scale": 0.2,
             "rotation": glm.vec3(0, 0, 0),
             "translation": glm.vec3(3, -0.115, 0),
         })
-        self.camera.add_model_to_check(monster)
+        self.camera.add_model_to_check(penguin)
 
         self.loadModel("light", {
             "scale": 0.1,
@@ -476,8 +476,8 @@ class Engine:
             lightObj.translation.x -= translationSpeed
         if key == glfw.KEY_RIGHT:
             lightObj.translation.x += translationSpeed
-        if key == glfw.KEY_PAGE_UP:
+        if key == glfw.KEY_M:
             lightObj.translation.z += translationSpeed
-        if key == glfw.KEY_PAGE_DOWN:
+        if key == glfw.KEY_N:
             lightObj.translation.z -= translationSpeed
         lightObj.haveMoved = True
