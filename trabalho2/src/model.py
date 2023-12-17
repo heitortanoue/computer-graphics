@@ -38,7 +38,6 @@ class Model:
         self.ns = lightInitialValues.get("shininess", 32)
         self.is_light_source = lightInitialValues.get("is_light_source", False)
 
-
         self.applyTransformations() # aplica valores iniciais
 
         # Set bounding box

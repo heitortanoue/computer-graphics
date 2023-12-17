@@ -195,7 +195,7 @@ class Engine:
 
             if model.is_light_source:
                 loc_light_pos = glGetUniformLocation(self.program, "light_position")
-                glUniform3f(loc_light_pos, model.translation.x, model.translation.y, model.translation.z)
+                glUniform3f(loc_light_pos, model.translation.x, -model.translation.y, -model.translation.z)
 
             # Desenha o modelo
             self.drawModel(model)
@@ -466,3 +466,18 @@ class Engine:
         if key == glfw.KEY_D:
             self.camera.move_right(translationSpeed)
             return
+
+        lightObj = self.objects[-1]
+        if key == glfw.KEY_UP:
+            lightObj.translation.y += translationSpeed
+        if key == glfw.KEY_DOWN:
+            lightObj.translation.y -= translationSpeed
+        if key == glfw.KEY_LEFT:
+            lightObj.translation.x -= translationSpeed
+        if key == glfw.KEY_RIGHT:
+            lightObj.translation.x += translationSpeed
+        if key == glfw.KEY_PAGE_UP:
+            lightObj.translation.z += translationSpeed
+        if key == glfw.KEY_PAGE_DOWN:
+            lightObj.translation.z -= translationSpeed
+        lightObj.haveMoved = True
