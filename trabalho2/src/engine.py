@@ -107,7 +107,7 @@ class Engine:
             "light": {
                 "ambient": 0.8,
                 "diffuse": 0.8,
-                "specular": 2,
+                "specular": 1,
             }
         })
         self.camera.add_model_to_check(clock)
@@ -119,7 +119,7 @@ class Engine:
             "light": {
                 "ambient": 0.5,
                 "diffuse": 0.8,
-                "specular": 0.4,
+                "specular": 0.15,
             }
         })
         self.camera.add_model_to_check(cat)
@@ -131,7 +131,7 @@ class Engine:
             "light": {
                 "ambient": 0.5,
                 "diffuse": 0.8,
-                "specular": 0.8,
+                "specular": 0.2,
             }
         })
         self.camera.add_model_to_check(raptor)
@@ -143,7 +143,7 @@ class Engine:
             "light": {
                 "ambient": 0.5,
                 "diffuse": 0.8,
-                "specular": 0.8,
+                "specular": 0.15,
             }
         })
         self.camera.add_model_to_check(penguin)
