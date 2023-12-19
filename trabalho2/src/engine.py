@@ -92,13 +92,23 @@ class Engine:
             "scale": 0.02,
             "rotation": glm.vec3(-1.57, 0, 0),
             "translation": glm.vec3(2, -0.293, 0.249),
+            "light": {
+                "ambient": 0.5,
+                "diffuse": 0.8,
+                "specular": 1,
+            }
         })
         self.camera.add_model_to_check(skull)
 
         clock = self.loadModel("clock", {
             "scale": 0.1,
-            "rotation": glm.vec3(-1.57, 0, 0),
+            "rotation": glm.vec3(0, 0, 0),
             "translation": glm.vec3(-0.5, 0, 0),
+            "light": {
+                "ambient": 0.8,
+                "diffuse": 0.8,
+                "specular": 2,
+            }
         })
         self.camera.add_model_to_check(clock)
 
@@ -106,6 +116,11 @@ class Engine:
             "scale": 0.006,
             "rotation": glm.vec3(-1.57, 0, 0),
             "translation": glm.vec3(-1, -0.258, 0.018),
+            "light": {
+                "ambient": 0.5,
+                "diffuse": 0.8,
+                "specular": 0.4,
+            }
         })
         self.camera.add_model_to_check(cat)
 
@@ -113,6 +128,11 @@ class Engine:
             "scale": 0.01,
             "rotation": glm.vec3(0, 0, 0),
             "translation": glm.vec3(2, 0, -1),
+            "light": {
+                "ambient": 0.5,
+                "diffuse": 0.8,
+                "specular": 0.8,
+            }
         })
         self.camera.add_model_to_check(raptor)
 
@@ -120,6 +140,11 @@ class Engine:
             "scale": 0.2,
             "rotation": glm.vec3(0, 0, 0),
             "translation": glm.vec3(3, -0.115, 0),
+            "light": {
+                "ambient": 0.5,
+                "diffuse": 0.8,
+                "specular": 0.8,
+            }
         })
         self.camera.add_model_to_check(penguin)
 
