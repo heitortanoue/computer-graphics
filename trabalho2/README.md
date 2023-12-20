@@ -1,4 +1,4 @@
-# Computação Gráfica - PROJETO 1
+# Computação Gráfica - PROJETO 2
 
 ### Autores
 
@@ -16,29 +16,27 @@ Este é um projeto para disciplina SCC0650 - Computação Gráfica que permite c
 
 - `engine.py`: Contém a lógica principal do programa, incluindo a estrutura para a troca de modelos, tratamento de eventos de teclado, movimentação, translação e escala do objeto.
 
+- `camera.py`: Contém a classe `Camera` que lida com a câmera virtual, incluindo a matriz de projeção e a matriz de visualização.
+
 ## Funcionalidades do Projeto
 
 O projeto atende às seguintes restrições e funcionalidades:
 
 1. Possibilita a leitura e processamento de 5 objetos a partir de arquivos .obj, cada um com sua textura.
 
-2. Permite a exibição individual de cada objeto por meio de eventos de teclado. Pressione a tecla "1" para exibir o objeto 1, a tecla "2" para o objeto 2 e assim por diante.
+2. É possível andar com a câmera virtual utilizando as teclas "W", "A", "S" e "D" e olhando para a direção desejada com o mouse.
 
-3. Cada objeto é centralizado no ponto (0, 0, 0) na primeira exibição e se movimenta de acordo com as teclas "A", "W", "S" e "D", usando transformações de translação para realizar essa movimentação. O código também garante que nenhum vértice do objeto fique fora do intervalo [-1, 1] em seus eixos, quando aplicadas as transformações de movimentação e escala.
+3. A tecla "P" ativa ou desativa a textura do objeto em exibição, alternando entre a visualização da malha poligonal e a aplicação da textura.
 
-4. É possível utilizar as teclas "Z" e "X" para aumentar e reduzir a escala do objeto em exibição.
+4. A tecla "V" permite alternar entre técnicas de magnificação da aplicação da textura, escolhendo entre LINEAR e NEAREST.
 
-5.  As teclas direcionais são utilizadas para rotacionar o objeto em exibição nos eixos X e Y. É possível realizar rotações no eixo Z com as teclas "M" e "N".
+5. A tecla "B" permite ativar/desativar a visualização do Bounding Box para o objeto selecionado.
 
-6. A tecla "P" ativa ou desativa a textura do objeto em exibição, alternando entre a visualização da malha poligonal e a aplicação da textura.
+6.  A tecla "ESC" permite encerrar a execução do programa.
 
-7. A tecla "V" permite alternar entre técnicas de magnificação da aplicação da textura, escolhendo entre LINEAR e NEAREST.
+7.  As teclas "J" e "K" permitem diminuir ou aumentar a intensidade da luz ambiente.
 
-8. A tecla "B" permite ativar/desativar a visualização do Bounding Box para o objeto selecionado.
-
-9. A tecla "F" permite alterar entre o modo janela e o modo tela cheia.
-
-10. A tecla "ESC" permite encerrar a execução do programa.
+8.  As setas direcionais e as teclas "M" e "N" permitem alterar a posição da fonte de luz.
 
 ## Dependências
 
