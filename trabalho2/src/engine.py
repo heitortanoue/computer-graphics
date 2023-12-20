@@ -9,7 +9,6 @@ from src.functions import *
 from src.model import *
 from src.camera import *
 
-
 def key_event_static(window,key,scancode,action,mods):
     engine = glfw.get_window_user_pointer(window)
 
@@ -67,6 +66,7 @@ class Engine:
             rotation = glm.vec3(0, 0, 0),
         )
         self.vCount = 0
+        self.ka_multiplier = 0.8
         self.init()
 
 
@@ -81,8 +81,8 @@ class Engine:
         skybox = self.loadModel('skybox', {
             "scale": skybox_scale,
             "light": {
-                "ambient": 1,
-                "diffuse": 0,
+                "ambient": 0.8,
+                "diffuse": 0.1,
                 "specular": 0,
             }
         })
@@ -94,7 +94,7 @@ class Engine:
             "translation": glm.vec3(2, -0.293, 0.249),
             "light": {
                 "ambient": 0.5,
-                "diffuse": 0.8,
+                "diffuse": 1,
                 "specular": 1,
             }
         })
@@ -106,7 +106,7 @@ class Engine:
             "translation": glm.vec3(-0.5, 0, 0),
             "light": {
                 "ambient": 0.8,
-                "diffuse": 0.8,
+                "diffuse": 1,
                 "specular": 1,
             }
         })
@@ -118,7 +118,7 @@ class Engine:
             "translation": glm.vec3(-1, -0.258, 0.018),
             "light": {
                 "ambient": 0.5,
-                "diffuse": 0.8,
+                "diffuse": 1,
                 "specular": 0.15,
             }
         })
@@ -130,7 +130,7 @@ class Engine:
             "translation": glm.vec3(2, 0, -1),
             "light": {
                 "ambient": 0.5,
-                "diffuse": 0.8,
+                "diffuse": 1,
                 "specular": 0.2,
             }
         })
@@ -142,7 +142,7 @@ class Engine:
             "translation": glm.vec3(3, -0.115, 0),
             "light": {
                 "ambient": 0.5,
-                "diffuse": 0.8,
+                "diffuse": 1,
                 "specular": 0.15,
             }
         })
@@ -207,7 +207,7 @@ class Engine:
 
             # Aplica iluminação
             loc_ka = glGetUniformLocation(self.program, "ka")
-            glUniform1f(loc_ka, model.ka)
+            glUniform1f(loc_ka, model.ka * self.ka_multiplier)
 
             loc_kd = glGetUniformLocation(self.program, "kd")
             glUniform1f(loc_kd, model.kd)
@@ -492,7 +492,16 @@ class Engine:
             self.camera.move_right(translationSpeed)
             return
 
+        if key == glfw.KEY_J:
+            if self.ka_multiplier > 0:
+                self.ka_multiplier -= 0.1
+
+        if key == glfw.KEY_K:
+            if self.ka_multiplier < 1:
+                self.ka_multiplier += 0.1
+
         lightObj = self.objects[-1]
+
         if key == glfw.KEY_UP:
             lightObj.translation.y += translationSpeed
         if key == glfw.KEY_DOWN:
