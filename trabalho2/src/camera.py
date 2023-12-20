@@ -5,6 +5,7 @@ from src.model import Model
 
 min_distance = .2
 class Camera:
+    # Classe que representa uma câmera
     def __init__(self, position: glm.vec3, rotation: glm.vec3, width = 1600, height = 900):
         self.position = position
         self.rotation = rotation

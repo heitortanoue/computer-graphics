@@ -10,18 +10,22 @@ from src.model import *
 from src.camera import *
 
 def key_event_static(window,key,scancode,action,mods):
+    # Obtém a instância da classe Engine
     engine = glfw.get_window_user_pointer(window)
 
+    # Se a tecla ESC for pressionada, fecha a janela
     if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
         printMessage("Closing window...", "red")
         glfw.set_window_should_close(window,True)
 
+    # Se a tecla F for pressionada, alterna entre fullscreen e janela
     if key == glfw.KEY_F and action == glfw.PRESS:
         engine.toggleFullscreen()
 
     engine.keyEvent(window,key,scancode,action,mods)
 
 def mouse_event(window, xpos, ypos):
+    # Obtém a instância da classe Engine
     engine = glfw.get_window_user_pointer(window)
     sensitivity = 0.001  # Adjust as needed
 
@@ -29,6 +33,7 @@ def mouse_event(window, xpos, ypos):
         engine.last_x = xpos
         engine.last_y = ypos
 
+    # Calcula o deslocamento do mouse
     xoffset = xpos - engine.last_x
     yoffset = ypos - engine.last_y
     engine.last_x = xpos
@@ -40,12 +45,13 @@ def mouse_event(window, xpos, ypos):
     engine.camera.rotation.y += xoffset
     engine.camera.rotation.x -= yoffset
 
-    # Constraint the pitch
+    # Limita o ângulo de rotação da câmera
     if engine.camera.rotation.x > 1.5:
         engine.camera.rotation.x = 1.5
     if engine.camera.rotation.x < -1.5:
         engine.camera.rotation.x = -1.5
 
+# Lê o código do shader de um arquivo
 vertex_code = readShaderFile('vertex.glsl')
 fragment_code = readShaderFile('fragment.glsl')
 
@@ -53,6 +59,7 @@ class Engine:
     boundaries = glm.vec4(0,0,0,0)
     position = glm.vec3(0,0,0)
 
+    # Construtor
     def __init__(self):
         if not glfw.init():
             raise Exception("Failed to initialize GLFW")
@@ -77,6 +84,7 @@ class Engine:
         self.buildProgram()
         self.initTextures()
 
+        # Carrega o skybox
         skybox_scale = 20
         skybox = self.loadModel('skybox', {
             "scale": skybox_scale,
@@ -88,6 +96,7 @@ class Engine:
         })
         self.camera.set_boundaries(skybox)
 
+        # Carrega os modelos
         skull = self.loadModel("skull", {
             "scale": 0.02,
             "rotation": glm.vec3(-1.57, 0, 0),
@@ -161,6 +170,7 @@ class Engine:
             }
         })
 
+        # Carrega os buffers
         self.loadAllBuffers()
 
         self.showWindow()
@@ -168,12 +178,15 @@ class Engine:
 
 
     def run(self):
+        # Define a função de callback de teclado
         glfw.set_cursor_pos_callback(self.window, mouse_event)
         glfw.set_input_mode(self.window, glfw.CURSOR, glfw.CURSOR_DISABLED)
 
+        # Loop principal
         while not glfw.window_should_close(self.window):
             glfw.poll_events()
 
+            # Limpa a tela
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             glClearColor(0.2, 0.2, 0.2, 1.0)
 
@@ -184,6 +197,7 @@ class Engine:
             loc_view = glGetUniformLocation(self.program, "view")
             glUniformMatrix4fv(loc_view, 1, GL_FALSE, np.array(self.camera.view_matrix()).T)
 
+            # Configura a projeção da câmera na GPU
             loc_projection = glGetUniformLocation(self.program, "projection")
             glUniformMatrix4fv(loc_projection, 1, GL_FALSE, np.array(self.camera.projection_matrix()).T)
 
@@ -191,7 +205,7 @@ class Engine:
             loc_view_pos = glGetUniformLocation(self.program, "view_position")
             glUniform3f(loc_view_pos, self.camera.position.x, self.camera.position.y, self.camera.position.z)
 
-
+            # Atualiza a posição da luz
             glfw.swap_buffers(self.window)
 
         glfw.terminate()
@@ -218,6 +232,7 @@ class Engine:
             loc_ns = glGetUniformLocation(self.program, "ns")
             glUniform1f(loc_ns, model.ns)
 
+            # Configura a posição da luz
             if model.is_light_source:
                 loc_light_pos = glGetUniformLocation(self.program, "light_position")
                 glUniform3f(loc_light_pos, model.translation.x, -model.translation.y, -model.translation.z)
@@ -226,6 +241,7 @@ class Engine:
             self.drawModel(model)
 
 
+    # Alterna entre modo janela e modo tela cheia
     def toggleFullscreen(self):
         monitor = glfw.get_primary_monitor()
         largura, altura = glfw.get_video_mode (monitor)[0]
@@ -244,6 +260,7 @@ class Engine:
         self.camera.set_width_height(largura, alturaTotal)
 
 
+    # Inicializa a janela
     def initWindow(self):
         printMessage('Initializing Window...', 'green')
         glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
@@ -257,57 +274,58 @@ class Engine:
         # Cria a janela em modo janela
         self.window = glfw.create_window(largura, altura - 30, "Trabalho 2", None, None)
 
+        # Centraliza a janela na tela
         glfw.make_context_current(self.window)
         glfw.set_window_user_pointer(self.window, self)
 
 
+    # Inicializa os shaders
     def initShaders(self):
         printMessage('Initializing Shaders...', 'green')
         self.program = glCreateProgram()
         vertex = glCreateShader(GL_VERTEX_SHADER)
         fragment = glCreateShader(GL_FRAGMENT_SHADER)
 
-        # Set shaders source
+        # Seta o código fonte dos shaders
         glShaderSource(vertex, vertex_code)
         glShaderSource(fragment, fragment_code)
 
-        # Compile shaders
+        # Compila os shaders
         glCompileShader(vertex)
-        if not glGetShaderiv(vertex, GL_COMPILE_STATUS):
+        if not glGetShaderiv(vertex, GL_COMPILE_STATUS): # se não compilou
             error = glGetShaderInfoLog(vertex).decode()
             printMessage(error, "red")
             raise RuntimeError("Erro de compilacao do Vertex Shader")
 
         glCompileShader(fragment)
-        if not glGetShaderiv(fragment, GL_COMPILE_STATUS):
+        if not glGetShaderiv(fragment, GL_COMPILE_STATUS): # se não compilou
             error = glGetShaderInfoLog(fragment).decode()
             printMessage(error, "red")
             raise RuntimeError("Erro de compilacao do Fragment Shader")
 
-        # Attach shader objects to the program
+        # Vincula os shaders ao programa
         glAttachShader(self.program, vertex)
         glAttachShader(self.program, fragment)
 
-
+    # Compila e constrói o programa
     def buildProgram(self):
         printMessage('Building Program...', 'green')
-        # Build program
+        # Constrói o programa
         glLinkProgram(self.program)
         if not glGetProgramiv(self.program, GL_LINK_STATUS):
             printMessage(glGetProgramInfoLog(self.program), "red")
             raise RuntimeError('Linking error')
-
-        # Make program the default program
+        
         glUseProgram(self.program)
 
-
+    # Inicializa as texturas
     def initTextures(self):
         printMessage('Initializing Textures...', 'green')
         glEnable(GL_TEXTURE_2D)
         qtd_texturas = 20
         self.textures = glGenTextures(qtd_texturas)
 
-
+    # Mostra a janela
     def showWindow(self):
         self.polygonal_mode = False
         self.texture_filter = False
@@ -315,58 +333,66 @@ class Engine:
         glfw.set_key_callback(self.window, key_event_static)
         glEnable(GL_DEPTH_TEST) ### importante para 3D
 
-
+    # Carrega a textura a partir de um arquivo
     def load_texture_from_file(self, texture_id, imagem):
         glBindTexture(GL_TEXTURE_2D, texture_id)
+        # Define os filtros de textura (minificação e magnificação)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+        # Carrega a imagem
         img = Image.open(create_model_path(imagem, 'jpg'))
         img_width = img.size[0]
         img_height = img.size[1]
         image_data = img.tobytes("raw", "RGB", 0, -1)
-        #image_data = np.array(list(img.getdata()), np.uint8)
+
+        # Envia a imagem para a GPU
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img_width, img_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data)
 
-
+    # Carrega um modelo a partir de um arquivo
     def loadModel(self, filename, initial_values = None):
         printMessage(f'Loading Model `{filename}` ...', 'yellow')
 
+        # Carrega o modelo
         modelo = Model(self.last_index, filename, initial_values)
         self.last_index += 1
         modelData = modelo.model
 
         printMessage(f'Processing OBJ Model. Initial vertex count: {len(modelo.vertices)}', 'grey')
 
+        # Processa os dados do modelo
         for face_data in modelData['faces']:
             face, texture, normal, materials = face_data
 
+            # Adiciona os vértices do modelo
             for vert_idx in face:
                 modelo.vertices.append(modelData['vertices'][vert_idx - 1])
 
+            # Adiciona as coordenadas de textura do modelo
             for tex_idx in texture:
-                if tex_idx > 0:  # Ensure that the texture index is valid
+                if tex_idx > 0:  # Garante que não seja um valor negativo, ou seja, válido
                     modelo.texture_coords.append(modelData['texture'][tex_idx - 1])
                 else:
-                    modelo.texture_coords.append([0.0, 0.0])  # Default texture coordinate
+                    modelo.texture_coords.append([0.0, 0.0])  # textura padrão
 
+            # Adiciona as normais do modelo
             for norm_idx in normal:
-                if norm_idx > 0:
+                if norm_idx > 0: # Garante que não seja um valor negativo, ou seja, válido
                     modelo.normals.append(modelData['normals'][norm_idx - 1])
                 else:
-                    modelo.normals.append([0.0, 0.0, 0.0]) # Default normal
+                    modelo.normals.append([0.0, 0.0, 0.0]) # normal padrão
 
         printMessage(f'Processing OBJ Model. Final vertex count: {len(modelo.vertices)}', 'grey')
 
-        # Load the texture for the model and define a buffer ID
+        # Carrega a textura do modelo
         self.load_texture_from_file(modelo.id, filename)
-        # self.setModelBuffers(modelo)
         self.objects.append(modelo)
 
         return modelo
 
-
+    # Carrega todos os buffers
     def loadAllBuffers(self):
         allVertices = []
         allTextures = []
@@ -380,6 +406,7 @@ class Engine:
 
         self.buffers = glGenBuffers(3)
 
+        # Vértices
         vertices = np.zeros(len(allVertices), [("position", np.float32, 3)])
         vertices['position'] = allVertices
 
@@ -392,7 +419,7 @@ class Engine:
         glEnableVertexAttribArray(loc_vertices)
         glVertexAttribPointer(loc_vertices, 3, GL_FLOAT, False, stride, offset)
 
-
+        # Texturas
         textures = np.zeros(len(allTextures), [("position", np.float32, 2)]) # duas coordenadas
         textures['position'] = allTextures
 
@@ -405,6 +432,7 @@ class Engine:
         glEnableVertexAttribArray(loc_texture_coord)
         glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, False, stride, offset)
 
+        # Normais
         normals = np.zeros(len(allNormals), [("position", np.float32, 3)]) # três coordenadas
         normals['position'] = allNormals
 
@@ -417,7 +445,7 @@ class Engine:
         glEnableVertexAttribArray(loc_normals)
         glVertexAttribPointer(loc_normals, 3, GL_FLOAT, False, stride, offset)
 
-
+    # Desenha um modelo
     def drawModel(self, model):
         glBindTexture(GL_TEXTURE_2D, model.id)
 
@@ -431,21 +459,23 @@ class Engine:
             self.vCount += len(model.vertices)
 
         edges = [
-            (0, 1), (1, 3), (3, 2), (2, 0),  # Top edges
-            (4, 5), (5, 7), (7, 6), (6, 4),  # Bottom edges
-            (0, 4), (1, 5), (2, 6), (3, 7)   # Side edges connecting top and bottom
+            (0, 1), (1, 3), (3, 2), (2, 0),  # Borda superior
+            (4, 5), (5, 7), (7, 6), (6, 4),  # Borda inferior
+            (0, 4), (1, 5), (2, 6), (3, 7)   # Bordas laterais (conectam superior e inferior)
         ]
 
+        # Desenha a bounding box do objeto
         if self.drawBB:
             glBegin(GL_LINES)
             for edge in edges:
                 for vertex_index in edge:
-                    vertex = model.bounding_box[vertex_index]  # vertex is a glm.vec4
-                    glVertex3f(vertex.x, vertex.y, vertex.z)  # Using x, y, z components
+                    vertex = model.bounding_box[vertex_index]  # vertex é glm.vec4
+                    glVertex3f(vertex.x, vertex.y, vertex.z)  # Usando x, y, z componentes
             glEnd()
 
-
+    # Evento de teclado
     def keyEvent(self, window, key, scancode, action, mods):
+        # Alterna entre modo poligonal e modo preenchido
         if key == glfw.KEY_P and action == glfw.PRESS:
             self.polygonal_mode = not self.polygonal_mode
             if self.polygonal_mode:
@@ -456,6 +486,7 @@ class Engine:
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
             return
 
+        # Alterna entre filtro de textura linear e nearest
         if key == glfw.KEY_V and action == glfw.PRESS:
             self.texture_filter = not self.texture_filter
             if self.texture_filter:
@@ -474,32 +505,31 @@ class Engine:
             printMessage("Draw bounding box: " + str(self.drawBB), 'blue')
             return
 
-        translationSpeed = 0.05
+        translationSpeed = 0.05 # Velocidade de translação da câmera
 
+        # Movimenta a câmera
         if key == glfw.KEY_W:
             self.camera.move_forward(translationSpeed)
             return
-
         if key == glfw.KEY_S:
             self.camera.move_backward(translationSpeed)
             return
-
         if key == glfw.KEY_A:
             self.camera.move_left(translationSpeed)
             return
-
         if key == glfw.KEY_D:
             self.camera.move_right(translationSpeed)
             return
 
+        # Altera a intensidade da luz ambiente
         if key == glfw.KEY_J:
             if self.ka_multiplier > 0:
                 self.ka_multiplier -= 0.1
-
         if key == glfw.KEY_K:
             if self.ka_multiplier < 1:
                 self.ka_multiplier += 0.1
 
+        # Movimenta a luz
         lightObj = self.objects[-1]
 
         if key == glfw.KEY_UP:
@@ -514,4 +544,5 @@ class Engine:
             lightObj.translation.z += translationSpeed
         if key == glfw.KEY_N:
             lightObj.translation.z -= translationSpeed
+
         lightObj.haveMoved = True

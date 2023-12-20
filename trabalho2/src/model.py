@@ -3,6 +3,7 @@ import glm
 
 min_distance = .05
 class Model:
+    # Classe que representa um modelo 3D
     def __init__(self, id, path, initial_values=None):
         if initial_values is None:
             initial_values = {}
@@ -25,7 +26,7 @@ class Model:
         self.height = proportions['height']
         self.depth = proportions['depth']
 
-        # Default values
+        # Valores iniciais padrão
         self.scale = initial_values.get("scale", 1)
         self.rotation = glm.vec3(*initial_values.get("rotation", [0, 0, 0]))
         self.translation = glm.vec3(*initial_values.get("translation", [0, 0, 0]))
@@ -40,9 +41,10 @@ class Model:
 
         self.applyTransformations() # aplica valores iniciais
 
-        # Set bounding box
+        # Seta a bounding box
         self.get_bounds()
 
+    # Aplica as transformações no objeto
     def applyTransformations(self):
         if not self.haveMoved:
             return
@@ -67,32 +69,28 @@ class Model:
         self.get_bounds()
         self.haveMoved = False
 
-        # Verifica se viola os limites
-        # if not self.violateBounds(newMat):
-        #     self.mat_transform = newMat
-        #     return
-
+    # Retorna os limites do objeto
     def get_bounds(self, mat_transformation=None):
         if not mat_transformation:
             mat_transformation = self.mat_transform
 
-        # Define the eight corners of the bounding box based on the unscaled and unrotated object
+        # Define as oito coordenadas do bounding box baseado no objeto não escalado e não rotacionado
         bbox_corners = [
-            glm.vec3(self.bounds['x_min'], self.bounds['y_min'], self.bounds['z_min']),  # bottom-front-left corner
-            glm.vec3(self.bounds['x_max'], self.bounds['y_min'], self.bounds['z_min']),  # bottom-front-right corner
-            glm.vec3(self.bounds['x_min'], self.bounds['y_max'], self.bounds['z_min']),  # top-front-left corner
-            glm.vec3(self.bounds['x_max'], self.bounds['y_max'], self.bounds['z_min']),  # top-front-right corner
-            glm.vec3(self.bounds['x_min'], self.bounds['y_min'], self.bounds['z_max']),  # bottom-back-left corner
-            glm.vec3(self.bounds['x_max'], self.bounds['y_min'], self.bounds['z_max']),  # bottom-back-right corner
-            glm.vec3(self.bounds['x_min'], self.bounds['y_max'], self.bounds['z_max']),  # top-back-left corner
-            glm.vec3(self.bounds['x_max'], self.bounds['y_max'], self.bounds['z_max']),  # top-back-right corner
+            glm.vec3(self.bounds['x_min'], self.bounds['y_min'], self.bounds['z_min']),  # Esquerda inferior frente
+            glm.vec3(self.bounds['x_max'], self.bounds['y_min'], self.bounds['z_min']),  # Direita inferior frente
+            glm.vec3(self.bounds['x_min'], self.bounds['y_max'], self.bounds['z_min']),  # Esquerda superior frente
+            glm.vec3(self.bounds['x_max'], self.bounds['y_max'], self.bounds['z_min']),  # Direita superior frente
+            glm.vec3(self.bounds['x_min'], self.bounds['y_min'], self.bounds['z_max']),  # Esquerda inferior trás
+            glm.vec3(self.bounds['x_max'], self.bounds['y_min'], self.bounds['z_max']),  # Direita inferior trás
+            glm.vec3(self.bounds['x_min'], self.bounds['y_max'], self.bounds['z_max']),  # Esquerda superior trás
+            glm.vec3(self.bounds['x_max'], self.bounds['y_max'], self.bounds['z_max']),  # Direita superior trás
         ]
 
-        # Transform the bounding box corners
+        # Transforma as coordenadas do bounding box para o espaço do mundo
         self.bounding_box = [glm.vec4(corner, 1) for corner in bbox_corners]
         bounding_box = [mat_transformation * corner for corner in self.bounding_box]
 
-        # Find min and max x, y, and z from the transformed bounding box corners
+        # Calcula os limites do bounding box
         min_x = min(corner.x for corner in bounding_box)
         max_x = max(corner.x for corner in bounding_box)
         min_y = min(corner.y for corner in bounding_box)
@@ -100,6 +98,7 @@ class Model:
         min_z = min(corner.z for corner in bounding_box)
         max_z = max(corner.z for corner in bounding_box)
 
+        # Retorna os limites do bounding box
         return {
             'min_x': min_x,
             'max_x': max_x,
@@ -147,6 +146,7 @@ class Model:
 
         remainder_translation = glm.vec3(0.0, 0.0, 0.0)
 
+        # Verifica se o objeto está dentro dos limites do modelo usando self.bounding_box
         if new_position.x < min_x:
             remainder_translation.x = min_x - new_position.x - min_distance
         elif new_position.x > max_x:
